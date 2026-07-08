@@ -10,3 +10,4 @@ __pycache__/
 
 # Uploaded Files
 uploads/
+node_modules/
