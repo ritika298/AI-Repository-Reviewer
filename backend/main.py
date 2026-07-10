@@ -73,6 +73,63 @@ from services.repository import (
     clone_or_extract_repo,
     get_repo_name,
 )
+
+# =====================================================================m=======
+# REPOSITORY SCANNING
+# ============================================================================
+
+from services.scanner import (
+    scan_repository,
+    detect_framework,
+)
+# ============================================================================
+# AST METADATA EXTRACTION
+# ============================================================================
+
+from services.parser import extract_ast_metadata
+
+# ============================================================================
+# CODE CHUNKING
+# ============================================================================
+
+from services.chunker import chunk_code
+
+# ============================================================================
+# EMBEDDING MODEL
+# ============================================================================
+
+from services.embeddings import (
+    get_embedding_model,
+    fallback_embedding,
+    generate_embeddings,
+)
+# ============================================================================
+# GEMINI HELPERS
+# ============================================================================
+
+from services.gemini import (
+    call_gemini_json,
+    call_gemini_text,
+)
+
+# ============================================================================
+# CHROMADB INDEXING
+# ============================================================================
+from services.chroma import (
+    index_chunks_in_chroma,
+    retrieve_top_chunks,
+)
+
+from models.schemas import SharedState
+
+# ============================================================================
+# CONSTANTS
+# ============================================================================
+
+# ============================================================================
+# PROGRESS STORE
+# ============================================================================
+
 # ============================================================================
 # APP SETUP
 # ============================================================================
@@ -97,314 +154,10 @@ def progress_endpoint(job_id: str):
     return {"steps": steps}
 
 
-# ============================================================================
-# EMBEDDING MODEL
-# ============================================================================
-
-_embedding_model = None
-_embedding_model_lock = threading.Lock()
-
-
-def get_embedding_model():
-    global _embedding_model
-    if _embedding_model is not None:
-        return _embedding_model
-    with _embedding_model_lock:
-        if _embedding_model is None and SentenceTransformer is not None:
-            try:
-                _embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5")
-            except Exception:
-                _embedding_model = False
-    return _embedding_model
-
-
-def fallback_embedding(text: str, dim: int = 384) -> List[float]:
-    seed = int(hashlib.md5(text.encode("utf-8", errors="ignore")).hexdigest(), 16)
-    rng_state = seed
-    vec = []
-    for i in range(dim):
-        rng_state = (rng_state * 1103515245 + 12345 + i) % (2 ** 31)
-        vec.append((rng_state / (2 ** 31)) * 2 - 1)
-    norm = sum(v * v for v in vec) ** 0.5 or 1.0
-    return [v / norm for v in vec]
-
-
-def generate_embeddings(texts: List[str]) -> List[List[float]]:
-    model = get_embedding_model()
-    if model:
-        try:
-            embeddings = model.encode(texts, normalize_embeddings=True)
-            return [e.tolist() for e in embeddings]
-        except Exception:
-            pass
-    return [fallback_embedding(t) for t in texts]
-
-
-# ============================================================================
-# GEMINI HELPERS
-# ============================================================================
-
-def call_gemini_json(prompt: str, fallback: Dict[str, Any]) -> Dict[str, Any]:
-    if genai is None or not GEMINI_API_KEY:
-        return fallback
-    try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(
-            prompt,
-            generation_config={"response_mime_type": "application/json", "temperature": 0.3},
-        )
-        text = response.text.strip()
-        text = re.sub(r"^```json|```$", "", text).strip()
-        return json.loads(text)
-    except Exception:
-        return fallback
-
-
-def call_gemini_text(prompt: str, fallback: str) -> str:
-    if genai is None or not GEMINI_API_KEY:
-        return fallback
-    try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(prompt, generation_config={"temperature": 0.3})
-        return response.text.strip()
-    except Exception:
-        return fallback
-
-
-# ============================================================================
-# REPOSITORY ACQUISITION
-# ============================================================================
-
-
-# =====================================================================m=======
-# REPOSITORY SCANNING
-# ============================================================================
-
-def scan_repository(repo_path: str) -> List[Dict[str, Any]]:
-    files_info = []
-    for root, dirs, files in os.walk(repo_path):
-        dirs[:] = [d for d in dirs if d not in IGNORE_DIRS and not d.startswith(".")]
-        for fname in files:
-            ext = Path(fname).suffix.lower()
-            if ext in IGNORE_EXTENSIONS:
-                continue
-            full_path = os.path.join(root, fname)
-            try:
-                size = os.path.getsize(full_path)
-            except OSError:
-                continue
-            if size == 0 or size > MAX_FILE_SIZE:
-                continue
-            rel_path = os.path.relpath(full_path, repo_path)
-            files_info.append({
-                "path": rel_path,
-                "full_path": full_path,
-                "ext": ext,
-                "language": LANGUAGE_MAP.get(ext, "Other"),
-                "size": size,
-            })
-            if len(files_info) >= MAX_FILES:
-                return files_info
-    return files_info
-
-
-def detect_framework(repo_path: str) -> str:
-    for marker, framework in FRAMEWORK_MARKERS.items():
-        if os.path.exists(os.path.join(repo_path, marker)):
-            if marker == "package.json":
-                try:
-                    with open(os.path.join(repo_path, marker), "r", encoding="utf-8", errors="ignore") as f:
-                        pkg = json.load(f)
-                    deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
-                    if "next" in deps:
-                        return "Next.js"
-                    if "react" in deps:
-                        return "React"
-                    if "vue" in deps:
-                        return "Vue.js"
-                    if "@angular/core" in deps:
-                        return "Angular"
-                    if "express" in deps:
-                        return "Express.js"
-                except Exception:
-                    pass
-            return framework
-    return "Unknown"
-
-
-# ============================================================================
-# AST METADATA EXTRACTION
-# ============================================================================
-
-def extract_python_ast(content: str) -> Dict[str, Any]:
-    functions, classes, imports = [], [], []
-    try:
-        tree = ast.parse(content)
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                functions.append(node.name)
-            elif isinstance(node, ast.ClassDef):
-                classes.append(node.name)
-            elif isinstance(node, ast.Import):
-                imports.extend(alias.name for alias in node.names)
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    imports.append(node.module)
-    except SyntaxError:
-        pass
-    return {"functions": functions, "classes": classes, "imports": imports}
-
-
-GENERIC_FUNC_PATTERNS = [
-    r"function\s+([A-Za-z0-9_]+)\s*\(",
-    r"const\s+([A-Za-z0-9_]+)\s*=\s*(?:async\s*)?\(",
-    r"(?:public|private|protected|static)\s+[\w<>\[\]]+\s+([A-Za-z0-9_]+)\s*\(",
-    r"func\s+([A-Za-z0-9_]+)\s*\(",
-    r"def\s+([A-Za-z0-9_]+)\s*\(",
-]
-GENERIC_CLASS_PATTERNS = [
-    r"class\s+([A-Za-z0-9_]+)",
-    r"interface\s+([A-Za-z0-9_]+)",
-    r"struct\s+([A-Za-z0-9_]+)",
-]
-GENERIC_IMPORT_PATTERNS = [
-    r"import\s+.*?['\"]([^'\"]+)['\"]",
-    r"require\(['\"]([^'\"]+)['\"]\)",
-    r"^import\s+([\w\.]+)",
-]
-
-
-def extract_generic_ast(content: str) -> Dict[str, Any]:
-    functions, classes, imports = set(), set(), set()
-    for pattern in GENERIC_FUNC_PATTERNS:
-        functions.update(re.findall(pattern, content))
-    for pattern in GENERIC_CLASS_PATTERNS:
-        classes.update(re.findall(pattern, content))
-    for pattern in GENERIC_IMPORT_PATTERNS:
-        imports.update(re.findall(pattern, content, re.MULTILINE))
-    return {
-        "functions": list(functions)[:50],
-        "classes": list(classes)[:50],
-        "imports": list(imports)[:50],
-    }
-
-
-def extract_ast_metadata(file_info: Dict[str, Any], content: str) -> Dict[str, Any]:
-    if file_info["ext"] == ".py":
-        return extract_python_ast(content)
-    return extract_generic_ast(content)
-
-
-# ============================================================================
-# CODE CHUNKING
-# ============================================================================
-
-def chunk_code(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    chunks = []
-    for file_info in files_info:
-        try:
-            with open(file_info["full_path"], "r", encoding="utf-8", errors="ignore") as f:
-                content = f.read()
-        except Exception:
-            continue
-
-        file_info["ast"] = extract_ast_metadata(file_info, content)
-        lines = content.splitlines()
-        if not lines:
-            continue
-
-        step = CHUNK_LINES - CHUNK_OVERLAP
-        for start in range(0, len(lines), step):
-            end = min(start + CHUNK_LINES, len(lines))
-            chunk_text = "\n".join(lines[start:end])
-            if not chunk_text.strip():
-                continue
-            chunks.append({
-                "id": str(uuid.uuid4()),
-                "file": file_info["path"],
-                "language": file_info["language"],
-                "start_line": start + 1,
-                "end_line": end,
-                "content": chunk_text[:2000],
-            })
-            if len(chunks) >= MAX_CHUNKS:
-                return chunks
-            if end >= len(lines):
-                break
-    return chunks
-
-
-# ============================================================================
-# CHROMADB INDEXING
-# ============================================================================
-
-def index_chunks_in_chroma(job_id: str, chunks: List[Dict[str, Any]]):
-    if chromadb is None:
-        return None
-    client = chromadb.EphemeralClient()
-    collection_name = f"repo_{job_id}".replace("-", "")
-    try:
-        client.delete_collection(collection_name)
-    except Exception:
-        pass
-    collection = client.get_or_create_collection(name=collection_name)
-
-    if not chunks:
-        return collection
-
-    texts = [c["content"] for c in chunks]
-    embeddings = generate_embeddings(texts)
-    ids = [c["id"] for c in chunks]
-    metadatas = [
-        {"file": c["file"], "start_line": c["start_line"], "end_line": c["end_line"], "language": c["language"]}
-        for c in chunks
-    ]
-    collection.add(ids=ids, embeddings=embeddings, documents=texts, metadatas=metadatas)
-    return collection
-
-
-def retrieve_top_chunks(collection, goal: str, chunks: List[Dict[str, Any]], top_k: int = TOP_K) -> List[Dict[str, Any]]:
-    if collection is None or not chunks:
-        return chunks[:top_k]
-    try:
-        query_embedding = generate_embeddings([goal])[0]
-        results = collection.query(query_embeddings=[query_embedding], n_results=min(top_k, len(chunks)))
-        retrieved = []
-        docs = results.get("documents", [[]])[0]
-        metas = results.get("metadatas", [[]])[0]
-        for doc, meta in zip(docs, metas):
-            retrieved.append({
-                "file": meta.get("file", "unknown"),
-                "language": meta.get("language", "Other"),
-                "start_line": meta.get("start_line", 0),
-                "end_line": meta.get("end_line", 0),
-                "content": doc,
-            })
-        return retrieved
-    except Exception:
-        return chunks[:top_k]
-
 
 # ============================================================================
 # LANGGRAPH SHARED STATE
 # ============================================================================
-
-class SharedState(TypedDict):
-    job_id: str
-    goal: str
-    repo_name: str
-    language: str
-    framework: str
-    total_files: int
-    retrieved_chunks: List[Dict[str, Any]]
-    metadata: Dict[str, Any]
-    repository_understanding: Dict[str, Any]
-    architecture: Dict[str, Any]
-    bugs: List[Dict[str, Any]]
-    best_practices: List[Dict[str, Any]]
-    recommendations: List[str]
-    health_score: int
-    final_report: Dict[str, Any]
 
 
 def format_chunks_for_prompt(chunks: List[Dict[str, Any]], limit: int = 8) -> str:
