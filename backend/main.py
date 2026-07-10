@@ -41,7 +41,38 @@ except ImportError:
     GEMINI_API_KEY = ""
 
 from langgraph.graph import StateGraph, END
+# ============================================================================
+# CONSTANTS
+# ============================================================================
+from core.config import (
+    IGNORE_DIRS,
+    IGNORE_EXTENSIONS,
+    LANGUAGE_MAP,
+    FRAMEWORK_MARKERS,
+    PIPELINE_STEPS,
+    MAX_FILES,
+    MAX_FILE_SIZE,
+    MAX_CHUNKS,
+    CHUNK_LINES,
+    CHUNK_OVERLAP,
+    TOP_K,
+)
+# ============================================================================
+# PROGRESS STORE
+# ============================================================================
+from core.progress import (
+    init_progress,
+    update_progress,
+    get_progress,
+)
 
+# ============================================================================
+# REPOSITORY ACQUISITION
+# ============================================================================
+from services.repository import (
+    clone_or_extract_repo,
+    get_repo_name,
+)
 # ============================================================================
 # APP SETUP
 # ============================================================================
@@ -56,108 +87,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ============================================================================
-# CONSTANTS
-# ============================================================================
-
-IGNORE_DIRS = {
-    ".git", "node_modules", "venv", ".venv", "__pycache__", "dist", "build",
-    ".next", ".idea", ".vscode", "target", "vendor", ".pytest_cache",
-    "coverage", ".mypy_cache", "egg-info", ".tox", "out", ".cache"
-}
-
-IGNORE_EXTENSIONS = {
-    ".png", ".jpg", ".jpeg", ".gif", ".ico", ".svg", ".pdf", ".zip", ".tar",
-    ".gz", ".exe", ".dll", ".so", ".class", ".pyc", ".woff", ".woff2",
-    ".ttf", ".eot", ".mp4", ".mp3", ".mov", ".bin", ".dat", ".lock", ".map"
-}
-
-LANGUAGE_MAP = {
-    ".py": "Python", ".js": "JavaScript", ".jsx": "JavaScript",
-    ".ts": "TypeScript", ".tsx": "TypeScript", ".java": "Java",
-    ".go": "Go", ".rb": "Ruby", ".php": "PHP", ".c": "C", ".cpp": "C++",
-    ".h": "C/C++ Header", ".cs": "C#", ".rs": "Rust", ".kt": "Kotlin",
-    ".swift": "Swift", ".html": "HTML", ".css": "CSS", ".scss": "SCSS",
-    ".json": "JSON", ".yaml": "YAML", ".yml": "YAML", ".md": "Markdown",
-    ".sql": "SQL", ".sh": "Shell"
-}
-
-FRAMEWORK_MARKERS = {
-    "package.json": "Node.js",
-    "requirements.txt": "Python",
-    "pyproject.toml": "Python",
-    "pom.xml": "Java (Maven)",
-    "build.gradle": "Java (Gradle)",
-    "go.mod": "Go",
-    "Gemfile": "Ruby",
-    "composer.json": "PHP",
-    "Cargo.toml": "Rust",
-    "next.config.js": "Next.js",
-    "angular.json": "Angular",
- } if False else {
-    "package.json": "Node.js", "requirements.txt": "Python",
-    "pyproject.toml": "Python", "pom.xml": "Java (Maven)",
-    "build.gradle": "Java (Gradle)", "go.mod": "Go",
-    "Gemfile": "Ruby", "composer.json": "PHP", "Cargo.toml": "Rust",
-    "next.config.js": "Next.js", "angular.json": "Angular"
- }
-
-PIPELINE_STEPS = [
-    {"key": "repository_cloned", "label": "Repository Cloned"},
-    {"key": "repository_indexed", "label": "Repository Indexed"},
-    {"key": "ast_metadata_extracted", "label": "AST Metadata Extracted"},
-    {"key": "code_chunked", "label": "Code Chunked"},
-    {"key": "embeddings_generated", "label": "Embeddings Generated"},
-    {"key": "chromadb_indexed", "label": "ChromaDB Indexed"},
-    {"key": "rag_retrieval", "label": "RAG Retrieval"},
-    {"key": "repository_understanding_agent", "label": "Repository Understanding Agent"},
-    {"key": "architecture_agent", "label": "Architecture Agent"},
-    {"key": "bug_agent", "label": "Bug Agent"},
-    {"key": "best_practice_agent", "label": "Best Practice Agent"},
-    {"key": "response_formatter", "label": "Response Formatter"},
-    {"key": "report_generated", "label": "Report Generated"},
-]
-
-MAX_FILES = 400
-MAX_FILE_SIZE = 400_000
-MAX_CHUNKS = 1500
-CHUNK_LINES = 60
-CHUNK_OVERLAP = 10
-TOP_K = 8
-
-# ============================================================================
-# PROGRESS STORE
-# ============================================================================
-
-PROGRESS_STORE: Dict[str, Dict[str, Any]] = {}
-PROGRESS_LOCK = threading.Lock()
-
-
-def init_progress(job_id: str):
-    with PROGRESS_LOCK:
-        PROGRESS_STORE[job_id] = {
-            step["key"]: {"label": step["label"], "status": "waiting", "timestamp": None}
-            for step in PIPELINE_STEPS
-        }
-
-
-def update_progress(job_id: str, step_key: str, status: str):
-    with PROGRESS_LOCK:
-        if job_id not in PROGRESS_STORE:
-            init_progress(job_id)
-        PROGRESS_STORE[job_id][step_key]["status"] = status
-        PROGRESS_STORE[job_id][step_key]["timestamp"] = time.time()
-
-
-def get_progress(job_id: str):
-    with PROGRESS_LOCK:
-        data = PROGRESS_STORE.get(job_id)
-        if not data:
-            return None
-        return [
-            {"key": key, "label": val["label"], "status": val["status"]}
-            for key, val in data.items()
-        ]
 
 
 @app.get("/api/progress/{job_id}")
@@ -246,51 +175,8 @@ def call_gemini_text(prompt: str, fallback: str) -> str:
 # REPOSITORY ACQUISITION
 # ============================================================================
 
-def clone_or_extract_repo(github_url: Optional[str], zip_bytes: Optional[bytes], zip_filename: Optional[str], work_dir: str) -> str:
-    repo_path = os.path.join(work_dir, "repo")
-    os.makedirs(repo_path, exist_ok=True)
 
-    if github_url:
-        if git is None:
-            raise HTTPException(status_code=500, detail="GitPython not installed on server")
-        try:
-            git.Repo.clone_from(github_url, repo_path, depth=1)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Failed to clone repository: {e}")
-        return repo_path
-
-    if zip_bytes:
-        zip_path = os.path.join(work_dir, "upload.zip")
-        with open(zip_path, "wb") as f:
-            f.write(zip_bytes)
-        try:
-            with zipfile.ZipFile(zip_path, "r") as zf:
-                for member in zf.namelist():
-                    member_path = os.path.normpath(os.path.join(repo_path, member))
-                    if not member_path.startswith(os.path.abspath(repo_path)):
-                        continue
-                zf.extractall(repo_path)
-        except zipfile.BadZipFile:
-            raise HTTPException(status_code=400, detail="Invalid ZIP file")
-
-        entries = [e for e in os.listdir(repo_path) if not e.startswith("__MACOSX")]
-        if len(entries) == 1 and os.path.isdir(os.path.join(repo_path, entries[0])):
-            return os.path.join(repo_path, entries[0])
-        return repo_path
-
-    raise HTTPException(status_code=400, detail="Either github_url or zip_file must be provided")
-
-
-def get_repo_name(github_url: Optional[str], zip_filename: Optional[str]) -> str:
-    if github_url:
-        name = github_url.rstrip("/").split("/")[-1]
-        return name.replace(".git", "")
-    if zip_filename:
-        return Path(zip_filename).stem
-    return "unknown-repository"
-
-
-# ============================================================================
+# =====================================================================m=======
 # REPOSITORY SCANNING
 # ============================================================================
 
