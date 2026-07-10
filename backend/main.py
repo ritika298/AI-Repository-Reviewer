@@ -122,6 +122,13 @@ from services.chroma import (
 
 from models.schemas import SharedState
 
+from utils.formatter import format_chunks_for_prompt
+
+# ---- Node: Repository Understanding Agent ----
+from agents.repository_agent import repository_understanding_agent
+# ---- Node: architecture Agent ----
+from agents.architecture_agent import architecture_agent
+
 # ============================================================================
 # CONSTANTS
 # ============================================================================
@@ -160,82 +167,11 @@ def progress_endpoint(job_id: str):
 # ============================================================================
 
 
-def format_chunks_for_prompt(chunks: List[Dict[str, Any]], limit: int = 8) -> str:
-    parts = []
-    for c in chunks[:limit]:
-        parts.append(f"### FILE: {c['file']} (lines {c['start_line']}-{c['end_line']})\n{c['content']}\n")
-    return "\n".join(parts)
 
 
-# ---- Node: Repository Understanding Agent ----
-
-def repository_understanding_agent(state: SharedState) -> SharedState:
-    update_progress(state["job_id"], "repository_understanding_agent", "running")
-    context = format_chunks_for_prompt(state["retrieved_chunks"])
-    prompt = f"""You are a senior software architect analyzing a code repository.
-Review Goal: {state['goal']}
-Repository Language: {state['language']}
-Framework: {state['framework']}
-
-Retrieved Code Context:
-{context}
-
-Return ONLY valid JSON with this exact structure:
-{{
-  "subsystems": [{{"name": "string", "purpose": "string", "keyFiles": ["string"]}}],
-  "workflow": [{{"step": "string", "description": "string"}}]
-}}
-Identify 2-5 subsystems and a 4-7 step workflow based on the retrieved code."""
-
-    fallback = {
-        "subsystems": [
-            {
-                "name": "Core Module",
-                "purpose": f"Primary logic for the {state['repo_name']} repository based on the review goal '{state['goal']}'.",
-                "keyFiles": [c["file"] for c in state["retrieved_chunks"][:5]] or ["N/A"],
-            }
-        ],
-        "workflow": [
-            {"step": "Entry Point", "description": "Application execution begins here."},
-            {"step": "Core Processing", "description": "Primary business logic is executed."},
-            {"step": "Output", "description": "Results are returned to the caller or user."},
-        ],
-    }
-
-    result = call_gemini_json(prompt, fallback)
-    state["repository_understanding"] = result
-    update_progress(state["job_id"], "repository_understanding_agent", "completed")
-    return state
 
 
-# ---- Node: Architecture Agent ----
 
-def architecture_agent(state: SharedState) -> SharedState:
-    update_progress(state["job_id"], "architecture_agent", "running")
-    context = format_chunks_for_prompt(state["retrieved_chunks"])
-    understanding = json.dumps(state["repository_understanding"])
-    prompt = f"""You are a principal software architect.
-Repository Understanding: {understanding}
-Retrieved Code:
-{context}
-
-Return ONLY valid JSON with this exact structure:
-{{
-  "description": "string - 2-4 sentence architecture summary",
-  "diagram": "string - simple ASCII flow diagram of the architecture using arrows",
-  "patterns": ["string - design patterns detected"]
-}}"""
-
-    fallback = {
-        "description": f"The {state['repo_name']} repository follows a modular {state['framework']} architecture organized around clearly separated subsystems.",
-        "diagram": "Client -> API Layer -> Business Logic -> Data Layer -> Database",
-        "patterns": ["Layered Architecture", "Separation of Concerns"],
-    }
-
-    result = call_gemini_json(prompt, fallback)
-    state["architecture"] = result
-    update_progress(state["job_id"], "architecture_agent", "completed")
-    return state
 
 
 # ---- Node: Bug Agent ----
