@@ -1,0 +1,164 @@
+.bugs-container {
+
+
+display:flex;
+
+flex-direction:column;
+
+gap:25px;
+
+
+}
+
+
+
+.severity-title {
+
+
+margin-top:20px;
+
+
+}
+
+
+
+.bug-card {
+
+
+padding:30px;
+
+
+}
+
+
+
+
+.bug-header {
+
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+
+margin-bottom:20px;
+
+
+}
+
+
+
+
+.priority-badge {
+
+
+padding:8px 18px;
+
+
+border-radius:20px;
+
+
+font-size:13px;
+
+
+font-weight:bold;
+
+
+}
+
+
+
+
+.high-badge {
+
+
+background:#450a0a;
+
+color:#fca5a5;
+
+
+}
+
+
+
+.medium-badge {
+
+
+background:#451a03;
+
+color:#fdba74;
+
+
+}
+
+
+
+.low-badge {
+
+
+background:#052e16;
+
+color:#86efac;
+
+
+}
+
+
+
+
+.bug-card h4 {
+
+
+color:#60a5fa;
+
+
+margin-top:20px;
+
+
+}
+
+
+
+.bug-card p,
+
+.bug-card li {
+
+
+color:#cbd5e1;
+
+line-height:1.6;
+
+
+}
+
+
+
+.high-bug {
+
+
+border-left:5px solid #ef4444;
+
+
+}
+
+
+
+.medium-bug {
+
+
+border-left:5px solid #f97316;
+
+
+}
+
+
+
+.low-bug {
+
+
+border-left:5px solid #22c55e;
+
+
+}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+Architecture
+</title>
+
+
+<link rel="stylesheet" href="../style.css">
+
+<link rel="stylesheet" href="../css/navigation.css">
+
+<link rel="stylesheet" href="../css/pages.css">
+
+<link rel="stylesheet" href="../css/architecture.css">
+
+
+</head>
+
+
+
+<body>
+
+
+<div id="sidebar"></div>
+
+
+
+<main class="dashboard-page">
+
+
+<header class="page-header">
+
+<h1>
+🏗 Repository Architecture
+</h1>
+
+
+<p>
+AI generated system architecture and communication flow
+</p>
+
+
+</header>
+
+
+
+
+
+<section class="architecture-container">
+
+
+
+<!-- UI -->
+
+<div class="architecture-node ui-layer">
+
+
+<h2>
+🎨 UI Layer
+</h2>
+
+
+<p>
+Responsible for user interaction and presentation.
+</p>
+
+
+<div class="details">
+
+<span>
+Components
+</span>
+
+<span>
+Pages
+</span>
+
+<span>
+User Events
+</span>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="flow-arrow">
+
+↓
+
+</div>
+
+
+
+
+
+
+
+<!-- BUSINESS -->
+
+<div class="architecture-node business-layer">
+
+
+<h2>
+⚙️ Business Logic Layer
+</h2>
+
+
+<p>
+Handles application rules, validation and processing.
+</p>
+
+
+<div class="details">
+
+<span>
+Controllers
+</span>
+
+<span>
+Services
+</span>
+
+<span>
+APIs
+</span>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="flow-arrow">
+
+↓
+
+</div>
+
+
+
+
+
+
+
+<!-- DATA -->
+
+<div class="architecture-node data-layer">
+
+
+<h2>
+🗄 Data Layer
+</h2>
+
+
+<p>
+Manages storage, retrieval and persistence.
+</p>
+
+
+<div class="details">
+
+<span>
+Repositories
+</span>
+
+<span>
+Models
+</span>
+
+<span>
+Database
+</span>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="flow-arrow">
+
+↓
+
+</div>
+
+
+
+
+
+
+
+<!-- UTILITIES -->
+
+
+<div class="architecture-node utility-layer">
+
+
+<h2>
+🔧 Shared Utilities
+</h2>
+
+
+<p>
+Reusable services supporting all layers.
+</p>
+
+
+<div class="details">
+
+<span>
+Logging
+</span>
+
+<span>
+Configuration
+</span>
+
+<span>
+Helpers
+</span>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+</section>
+
+
+
+
+
+
+<section class="communication-card card">
+
+
+<h2>
+🔄 Communication Flow
+</h2>
+
+
+
+<div class="communication-flow">
+
+
+<div>
+User Request
+</div>
+
+
+<span>
+→
+</span>
+
+
+<div>
+UI Processing
+</div>
+
+
+<span>
+→
+</span>
+
+
+<div>
+API Request
+</div>
+
+
+<span>
+→
+</span>
+
+
+<div>
+Business Logic
+</div>
+
+
+<span>
+→
+</span>
+
+
+<div>
+Database
+</div>
+
+
+<span>
+→
+</span>
+
+
+<div>
+Response
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+</main>
+
+
+
+
+<script src="../js/navigation.js"></script>
+
+
+</body>
+
+</html>

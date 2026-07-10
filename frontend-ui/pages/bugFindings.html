@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+
+<head>
+
+
+<meta charset="UTF-8">
+
+
+<title>
+Bug Findings
+</title>
+
+
+<link rel="stylesheet" href="../style.css">
+
+<link rel="stylesheet" href="../css/navigation.css">
+
+<link rel="stylesheet" href="../css/pages.css">
+
+<link rel="stylesheet" href="../css/bugs.css">
+
+
+</head>
+
+
+
+<body>
+
+
+<div id="sidebar"></div>
+
+
+
+
+<main class="dashboard-page">
+
+
+
+<header class="page-header">
+
+
+<h1>
+🐞 Bug Findings
+</h1>
+
+
+<p>
+AI detected repository issues and recommended fixes
+</p>
+
+
+</header>
+
+
+
+
+
+
+
+<section class="bugs-container">
+
+
+
+
+
+<h2 class="severity-title high-title">
+🔴 High Severity Issues
+</h2>
+
+
+
+
+
+<div class="bug-card card high-bug">
+
+
+
+<div class="bug-header">
+
+
+<h2>
+Authentication Vulnerability
+</h2>
+
+
+<span class="priority-badge high-badge">
+HIGH
+</span>
+
+
+</div>
+
+
+
+<h4>
+Description
+</h4>
+
+
+<p>
+JWT validation is missing during authentication requests.
+</p>
+
+
+
+
+<h4>
+Affected Files
+</h4>
+
+
+<ul>
+
+<li>
+auth/controller.java
+</li>
+
+<li>
+security/service.java
+</li>
+
+</ul>
+
+
+
+
+
+<h4>
+Root Cause
+</h4>
+
+
+<p>
+Improper token verification implementation.
+</p>
+
+
+
+
+<h4>
+Impact
+</h4>
+
+
+<p>
+Potential unauthorized access to protected resources.
+</p>
+
+
+
+
+<h4>
+Suggested Fix
+</h4>
+
+
+<p>
+Implement secure token validation middleware.
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<h2 class="severity-title medium-title">
+🟠 Medium Severity Issues
+</h2>
+
+
+
+
+
+
+<div class="bug-card card medium-bug">
+
+
+
+<div class="bug-header">
+
+
+<h2>
+Database Query Optimization
+</h2>
+
+
+<span class="priority-badge medium-badge">
+MEDIUM
+</span>
+
+
+</div>
+
+
+
+
+<h4>
+Description
+</h4>
+
+
+<p>
+Several queries require optimization.
+</p>
+
+
+
+<h4>
+Affected Files
+</h4>
+
+
+<ul>
+
+<li>
+repository/userRepository.java
+</li>
+
+</ul>
+
+
+
+
+<h4>
+Root Cause
+</h4>
+
+
+<p>
+Missing indexing and inefficient queries.
+</p>
+
+
+
+
+<h4>
+Impact
+</h4>
+
+
+<p>
+Reduced application performance.
+</p>
+
+
+
+
+<h4>
+Suggested Fix
+</h4>
+
+
+<p>
+Add indexes and optimize database queries.
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<h2 class="severity-title low-title">
+🟢 Low Severity Issues
+</h2>
+
+
+
+
+
+
+
+<div class="bug-card card low-bug">
+
+
+
+<div class="bug-header">
+
+
+<h2>
+Missing Documentation
+</h2>
+
+
+<span class="priority-badge low-badge">
+LOW
+</span>
+
+
+</div>
+
+
+
+<h4>
+Description
+</h4>
+
+
+<p>
+Some modules lack proper documentation.
+</p>
+
+
+
+<h4>
+Affected Files
+</h4>
+
+
+<ul>
+
+<li>
+README.md
+</li>
+
+<li>
+services/
+</li>
+
+</ul>
+
+
+
+
+<h4>
+Root Cause
+</h4>
+
+
+<p>
+Documentation was not maintained.
+</p>
+
+
+
+
+<h4>
+Impact
+</h4>
+
+
+<p>
+Reduced developer onboarding speed.
+</p>
+
+
+
+
+<h4>
+Suggested Fix
+</h4>
+
+
+<p>
+Add module documentation and examples.
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+</section>
+
+
+
+
+</main>
+
+
+
+
+<script src="../js/navigation.js"></script>
+
+
+
+</body>
+
+
+</html>

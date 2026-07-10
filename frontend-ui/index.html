@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Repository Reviewer</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="css/navigation.css">
+
+</head>
+
+
+<body>
+
+    <!-- SIDEBAR -->
+<div id="sidebar"></div>
+
+
+<div class="page">
+
+
+    <!-- HERO HEADER -->
+
+    <header class="hero">
+
+        <div class="hero-content">
+
+            <h1>
+                AI Repository Reviewer
+            </h1>
+
+            <p>
+                Analyze repositories with AI-powered insights
+            </p>
+
+        </div>
+
+
+    </header>
+
+
+
+
+    <!-- ANALYSIS FORM -->
+
+
+    <section class="upload-section">
+
+
+        <div class="upload-card">
+
+
+            <h2>
+                Analyze Repository
+            </h2>
+
+
+            <p class="description">
+                Upload your repository or provide a GitHub URL to generate AI insights.
+            </p>
+
+
+
+            <input
+                type="text"
+                id="githubUrl"
+                placeholder="Enter GitHub Repository URL"
+            >
+
+
+
+            <div class="divider">
+                OR
+            </div>
+
+
+
+            <label class="file-box">
+
+
+                <span>
+                    Upload ZIP Repository
+                </span>
+
+
+                <input
+                    type="file"
+                    id="zipFile"
+                    accept=".zip"
+                >
+
+
+            </label>
+
+
+
+            <input
+                type="text"
+                id="goal"
+                placeholder="Review Goal (Optional)"
+            >
+
+
+
+            <button id="analyzeBtn">
+
+                Analyze Repository
+
+            </button>
+
+
+
+        </div>
+
+
+    </section>
+
+
+
+
+
+
+    <!-- DASHBOARD -->
+
+<main class="dashboard">
+
+
+<section class="top-dashboard">
+
+
+    <!-- Repository Overview -->
+
+    <div class="card overview">
+
+
+        <h2>
+            📁 Repository Overview
+        </h2>
+
+
+        <div class="repo-info">
+
+            <p>
+                <span>Repository:</span>
+                AI Project Repository
+            </p>
+
+
+            <p>
+                <span>Status:</span>
+                <b class="status complete">
+                    Analyzed
+                </b>
+            </p>
+
+
+            <p>
+                <span>Main Language:</span>
+                Java / JavaScript
+            </p>
+
+
+            <p>
+                <span>Structure:</span>
+                Frontend + Backend + Database
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+    <!-- Health Score -->
+
+
+    <div class="card health">
+
+
+        <h2>
+            💚 Health Score
+        </h2>
+
+
+        <div class="score">
+            92%
+        </div>
+
+
+        <p>
+            Repository quality is excellent
+        </p>
+
+
+        <div class="progress-bar">
+
+            <div 
+            class="progress-fill"
+            style="width:92%">
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+<!-- AI AGENTS -->
+
+<section class="agent-grid">
+
+
+<div class="card agent-card">
+
+<h2>
+🤖 Repository Understanding Agent
+</h2>
+
+<span class="status complete">
+Completed
+</span>
+
+<div class="progress-bar">
+<div class="progress-fill" style="width:100%"></div>
+</div>
+
+<p>
+Analyzed repository structure and identified major layers.
+</p>
+
+</div>
+
+
+
+
+<div class="card agent-card">
+
+<h2>
+🏗 Architecture Agent
+</h2>
+
+<span class="status complete">
+Completed
+</span>
+
+<div class="progress-bar">
+<div class="progress-fill" style="width:90%"></div>
+</div>
+
+<p>
+Generated system architecture and communication flow.
+</p>
+
+</div>
+
+
+
+
+
+<div class="card agent-card">
+
+<h2>
+🐞 Bug Detection Agent
+</h2>
+
+<span class="status running">
+Running
+</span>
+
+<div class="progress-bar">
+<div class="progress-fill" style="width:65%"></div>
+</div>
+
+<p>
+Scanning repository for vulnerabilities and issues.
+</p>
+
+</div>
+
+
+
+
+
+<div class="card agent-card">
+
+<h2>
+⭐ Best Practices Agent
+</h2>
+
+<span class="status complete">
+Completed
+</span>
+
+<div class="progress-bar">
+<div class="progress-fill" style="width:85%"></div>
+</div>
+
+<p>
+Analyzed coding standards and maintainability.
+</p>
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+<!-- STATS -->
+
+<section class="stats-grid">
+
+
+<div class="card stat-card">
+
+    <h3>
+        📁 Files Analyzed
+    </h3>
+
+    <strong>
+        1240
+    </strong>
+
+    <p>
+        Repository files scanned
+    </p>
+
+</div>
+
+
+
+
+<div class="card stat-card">
+
+    <h3>
+        💻 Lines of Code
+    </h3>
+
+    <strong>
+        85000
+    </strong>
+
+    <p>
+        Total code analyzed
+    </p>
+
+</div>
+
+
+
+
+<div class="card stat-card">
+
+    <h3>
+        🌐 Languages
+    </h3>
+
+    <strong>
+        8
+    </strong>
+
+    <p>
+        Programming languages detected
+    </p>
+
+</div>
+
+
+
+
+<div class="card stat-card">
+
+    <h3>
+        👥 Contributors
+    </h3>
+
+    <strong>
+        25
+    </strong>
+
+    <p>
+        Repository contributors
+    </p>
+
+</div>
+
+
+
+
+<div class="card stat-card">
+
+    <h3>
+        🔀 Branches
+    </h3>
+
+    <strong>
+        12
+    </strong>
+
+    <p>
+        Active branches
+    </p>
+
+</div>
+
+
+
+
+<div class="card stat-card">
+
+    <h3>
+        📝 Pull Requests
+    </h3>
+
+    <strong>
+        48
+    </strong>
+
+    <p>
+        Repository changes
+    </p>
+
+</div>
+
+
+
+
+<div class="card stat-card">
+
+    <h3>
+        🔌 APIs
+    </h3>
+
+    <strong>
+        36
+    </strong>
+
+    <p>
+        API endpoints detected
+    </p>
+
+</div>
+
+
+
+
+<div class="card stat-card">
+
+    <h3>
+        🗄 Database Tables
+    </h3>
+
+    <strong>
+        18
+    </strong>
+
+    <p>
+        Database structures found
+    </p>
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+<!-- QUICK NAVIGATION -->
+
+<section class="quick-grid">
+
+
+<a href="pages/architecture.html" class="card quick-card">
+
+    <div class="quick-icon">
+        🏗
+    </div>
+
+    <h3>
+        Architecture
+    </h3>
+
+    <p>
+        View repository system design
+    </p>
+
+</a>
+
+
+
+
+<a href="pages/workflow.html" class="card quick-card">
+
+    <div class="quick-icon">
+        🔄
+    </div>
+
+    <h3>
+        Workflow
+    </h3>
+
+    <p>
+        Understand request lifecycle
+    </p>
+
+</a>
+
+
+
+
+
+<a href="pages/bugFindings.html" class="card quick-card">
+
+    <div class="quick-icon">
+        🐞
+    </div>
+
+    <h3>
+        Bug Findings
+    </h3>
+
+    <p>
+        View detected issues
+    </p>
+
+</a>
+
+
+
+
+
+<a href="pages/bestPractices.html" class="card quick-card">
+
+    <div class="quick-icon">
+        ⭐
+    </div>
+
+    <h3>
+        Best Practices
+    </h3>
+
+    <p>
+        Improve code quality
+    </p>
+
+</a>
+
+
+
+
+
+<a href="pages/ragFiles.html" class="card quick-card">
+
+    <div class="quick-icon">
+        📚
+    </div>
+
+    <h3>
+        RAG Files
+    </h3>
+
+    <p>
+        View retrieved files
+    </p>
+
+</a>
+
+
+
+
+
+<a href="pages/recommendations.html" class="card quick-card">
+
+    <div class="quick-icon">
+        💡
+    </div>
+
+    <h3>
+        Recommendations
+    </h3>
+
+    <p>
+        AI improvement suggestions
+    </p>
+
+</a>
+
+
+
+
+
+<a href="pages/aiAgents.html" class="card quick-card">
+
+    <div class="quick-icon">
+        🤖
+    </div>
+
+    <h3>
+        AI Agents
+    </h3>
+
+    <p>
+        Monitor AI processes
+    </p>
+
+</a>
+
+
+
+
+
+<a href="pages/statistics.html" class="card quick-card">
+
+    <div class="quick-icon">
+        📊
+    </div>
+
+    <h3>
+        Statistics
+    </h3>
+
+    <p>
+        Repository metrics
+    </p>
+
+</a>
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- RECENT ACTIVITY -->
+
+
+<section class="card activity">
+
+
+<h2>
+Recent Activity
+</h2>
+
+
+<ul>
+
+<li>
+Repository uploaded successfully
+</li>
+
+<li>
+AI analysis completed
+</li>
+
+<li>
+Architecture generated
+</li>
+
+<li>
+Security issues detected
+</li>
+
+
+</ul>
+
+
+</section>
+
+
+
+</main>
+   
+
+
+
+</div>
+
+
+
+
+
+<script src="js/navigation.js"></script>
+<script src="script.js"></script>
+<script src="js/animations.js"></script>
+
+</body>
+
+</html>

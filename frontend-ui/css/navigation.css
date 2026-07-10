@@ -1,0 +1,160 @@
+/* ================= SIDEBAR ================= */
+
+
+.sidebar {
+
+    width:260px;
+
+    height:100vh;
+
+    background:#0f172a;
+
+    border-right:1px solid #1e293b;
+
+    padding:25px;
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+    z-index:9999;
+
+    overflow-y:auto;
+
+}
+
+
+
+
+/* LOGO */
+
+
+.sidebar-logo h2 {
+
+    font-size:24px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #60a5fa,
+        #c084fc
+    );
+
+    -webkit-background-clip:text;
+
+    background-clip:text;
+
+    color:transparent;
+
+}
+
+
+
+.sidebar-logo p {
+
+    color:#94a3b8;
+
+    margin-top:5px;
+
+    font-size:14px;
+
+}
+
+
+
+/* MENU */
+
+
+.menu {
+
+    margin-top:35px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+
+
+.menu a {
+
+    padding:12px 15px;
+
+    border-radius:12px;
+
+    color:#cbd5e1;
+
+    text-decoration:none;
+
+    transition:.3s;
+
+}
+
+
+
+.menu a:hover {
+
+    background:#1e293b;
+
+    color:white;
+
+}
+
+
+
+.menu a.active {
+
+    background:
+    linear-gradient(
+        90deg,
+        #2563eb,
+        #7c3aed
+    );
+
+    color:white;
+
+}
+
+
+
+/* MOBILE */
+
+
+@media(max-width:900px){
+
+
+.sidebar {
+
+    position:relative;
+
+    width:100%;
+
+    height:auto;
+
+    min-height:auto;
+
+}
+
+
+
+.menu {
+
+    flex-direction:column;
+
+}
+
+
+
+.menu a {
+
+    width:100%;
+
+}
+
+
+}
