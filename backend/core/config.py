@@ -3,9 +3,26 @@
 # ============================================================================
 
 IGNORE_DIRS = {
-    ".git", "node_modules", "venv", ".venv", "__pycache__", "dist", "build",
-    ".next", ".idea", ".vscode", "target", "vendor", ".pytest_cache",
-    "coverage", ".mypy_cache", "egg-info", ".tox", "out", ".cache"
+    ".git",
+    "node_modules",
+    "venv",
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".tox",
+    ".cache",
+    "build",
+    "dist",
+    "target",
+    "out",
+    "bin",
+    "obj",
+    "vendor",
+    ".next",
+    ".idea",
+    ".vscode",
+    "coverage",
 }
 
 IGNORE_EXTENSIONS = {
@@ -13,36 +30,144 @@ IGNORE_EXTENSIONS = {
     ".gz", ".exe", ".dll", ".so", ".class", ".pyc", ".woff", ".woff2",
     ".ttf", ".eot", ".mp4", ".mp3", ".mov", ".bin", ".dat", ".lock", ".map"
 }
-
 LANGUAGE_MAP = {
-    ".py": "Python", ".js": "JavaScript", ".jsx": "JavaScript",
-    ".ts": "TypeScript", ".tsx": "TypeScript", ".java": "Java",
-    ".go": "Go", ".rb": "Ruby", ".php": "PHP", ".c": "C", ".cpp": "C++",
-    ".h": "C/C++ Header", ".cs": "C#", ".rs": "Rust", ".kt": "Kotlin",
-    ".swift": "Swift", ".html": "HTML", ".css": "CSS", ".scss": "SCSS",
-    ".json": "JSON", ".yaml": "YAML", ".yml": "YAML", ".md": "Markdown",
-    ".sql": "SQL", ".sh": "Shell"
+    # Python
+    ".py": "Python",
+
+    # JavaScript / TypeScript
+    ".js": "JavaScript",
+    ".jsx": "JavaScript",
+    ".ts": "TypeScript",
+    ".tsx": "TypeScript",
+
+    # Java / Kotlin
+    ".java": "Java",
+    ".kt": "Kotlin",
+    ".kts": "Kotlin",
+
+    # C / C++
+    ".c": "C",
+    ".cpp": "C++",
+    ".cc": "C++",
+    ".cxx": "C++",
+    ".h": "C/C++ Header",
+    ".hpp": "C++ Header",
+
+    # C#
+    ".cs": "C#",
+
+    # Go
+    ".go": "Go",
+
+    # Rust
+    ".rs": "Rust",
+
+    # Swift
+    ".swift": "Swift",
+
+    # PHP
+    ".php": "PHP",
+
+    # Ruby
+    ".rb": "Ruby",
+
+    # Dart (Flutter)
+    ".dart": "Dart",
+
+    # Scala
+    ".scala": "Scala",
+
+    # R
+    ".r": "R",
+
+    # Julia
+    ".jl": "Julia",
+
+    # Lua
+    ".lua": "Lua",
+
+    # Perl
+    ".pl": "Perl",
+
+    # Web Technologies
+    ".html": "HTML",
+    ".css": "CSS",
+    ".scss": "SCSS",
+    ".sass": "SASS",
+    ".less": "LESS",
+
+    # Frontend Frameworks
+    ".vue": "Vue",
+    ".svelte": "Svelte",
+
+    # Configuration Files
+    ".json": "JSON",
+    ".yaml": "YAML",
+    ".yml": "YAML",
+    ".xml": "XML",
+    ".toml": "TOML",
+    ".ini": "INI",
+
+    # Database
+    ".sql": "SQL",
+
+    # Shell Scripts
+    ".sh": "Shell",
+    ".bash": "Shell",
+    ".zsh": "Shell",
+
+    # Documentation
+    ".md": "Markdown",
 }
 
+
 FRAMEWORK_MARKERS = {
+    # JavaScript / Node
     "package.json": "Node.js",
+    "package-lock.json": "npm",
+    "yarn.lock": "Yarn",
+    "pnpm-lock.yaml": "pnpm",
+
+    # Python
     "requirements.txt": "Python",
     "pyproject.toml": "Python",
-    "pom.xml": "Java (Maven)",
-    "build.gradle": "Java (Gradle)",
+    "Pipfile": "Python",
+    "poetry.lock": "Poetry",
+
+    # Java
+    "pom.xml": "Maven",
+    "build.gradle": "Gradle",
+    "build.gradle.kts": "Gradle",
+
+    # Go
     "go.mod": "Go",
-    "Gemfile": "Ruby",
-    "composer.json": "PHP",
+
+    # Rust
     "Cargo.toml": "Rust",
+
+    # PHP
+    "composer.json": "PHP",
+
+    # Ruby
+    "Gemfile": "Ruby",
+
+    # .NET
+    "*.csproj": ".NET",
+
+    # Frontend
     "next.config.js": "Next.js",
+    "next.config.ts": "Next.js",
     "angular.json": "Angular",
- } if False else {
-    "package.json": "Node.js", "requirements.txt": "Python",
-    "pyproject.toml": "Python", "pom.xml": "Java (Maven)",
-    "build.gradle": "Java (Gradle)", "go.mod": "Go",
-    "Gemfile": "Ruby", "composer.json": "PHP", "Cargo.toml": "Rust",
-    "next.config.js": "Next.js", "angular.json": "Angular"
- }
+    "vite.config.js": "Vite",
+    "vite.config.ts": "Vite",
+    "nuxt.config.ts": "Nuxt",
+    "svelte.config.js": "Svelte",
+
+    # Docker
+    "Dockerfile": "Docker",
+    "docker-compose.yml": "Docker Compose",
+    "docker-compose.yaml": "Docker Compose",
+}
 
 PIPELINE_STEPS = [
     {"key": "repository_cloned", "label": "Repository Cloned"},
