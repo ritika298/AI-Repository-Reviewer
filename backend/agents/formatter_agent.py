@@ -9,16 +9,11 @@ def compute_health_score(
     best_practices: List[Dict[str, Any]],
 ) -> int:
     """
-    Computes an overall repository health score.
+    Computes a deterministic repository health score.
     """
 
-    score = 85
-
-    penalty_map = {
-        "HIGH": 8,
-        "MEDIUM": 4,
-        "LOW": 1,
-    }
+    # Start with a perfect score
+    score = 100
 
     # Remove duplicate AI findings
     unique_bugs = {
@@ -30,38 +25,26 @@ def compute_health_score(
         for bug in bugs
     }.values()
 
-    bug_penalty = 0
-
+    # Deduct points based on bug severity
     for bug in unique_bugs:
-        bug_penalty += penalty_map.get(
-            bug.get("severity", "LOW"),
-            1,
-        )
+        severity = bug.get("severity", "LOW")
 
-    # Maximum penalty from bugs
-    bug_penalty = min(bug_penalty, 30)
+        if severity == "HIGH":
+            score -= 8
+        elif severity == "MEDIUM":
+            score -= 4
+        else:
+            score -= 2
 
-    score -= bug_penalty
+    # Deduct points for failed best practices
+    for practice in best_practices:
+        if practice["status"] == "FAILED":
+            score -= 2
 
-    passed = sum(
-        1
-        for p in best_practices
-        if p["status"] == "PASSED"
-    )
+    # Keep score between 0 and 100
+    score = max(0, min(100, score))
 
-    failed = sum(
-        1
-        for p in best_practices
-        if p["status"] == "FAILED"
-    )
-
-    # Reward good practices
-    score += passed * 2
-
-    # Penalize failed practices
-    score -= failed * 2
-
-    return max(40, min(100, score))
+    return score
 
 
 def get_health_grade(score: int) -> str:
@@ -120,8 +103,15 @@ def response_formatter(state: SharedState) -> SharedState:
             "Repository is in good health. Continue following current engineering practices."
         )
 
-    recommendations.append(
-        f"Consider adding automated tests focused on: {state['goal']}"
+    testing_failed = any(
+       p["category"] == "Testing"
+       and p["status"] == "FAILED"
+      for p in state["best_practices"]
+     )
+
+    if testing_failed:
+      recommendations.append(
+        "Increase automated test coverage for critical application workflows."
     )
 
     files_retrieved = []

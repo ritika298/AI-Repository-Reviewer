@@ -103,7 +103,12 @@ async def analyze_repository(
             "final_report": {},
         }
 
-        final_state = COMPILED_GRAPH.invoke(initial_state)
+        try:
+          final_state = COMPILED_GRAPH.invoke(initial_state)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            raise
         return final_state["final_report"]
 
     finally:

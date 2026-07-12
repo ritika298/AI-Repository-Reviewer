@@ -5,35 +5,76 @@ from utils.formatter import format_chunks_for_prompt
 
 
 def repository_understanding_agent(state: SharedState) -> SharedState:
-    update_progress(state["job_id"], "repository_understanding_agent", "running")
+    update_progress(
+        state["job_id"],
+        "repository_understanding_agent",
+        "running",
+    )
 
-    context = format_chunks_for_prompt(state["retrieved_chunks"])
+    context = format_chunks_for_prompt(
+        state["retrieved_chunks"]
+    )
 
-    prompt = f"""You are a senior software architect analyzing a code repository.
-Review Goal: {state['goal']}
-Repository Language: {state['language']}
-Framework: {state['framework']}
+    prompt = f"""
+You are a Principal Software Architect performing repository understanding for an AI-powered code reviewer.
 
-Retrieved Code Context:
+Your objective is to understand the overall repository structure using ONLY the provided repository context.
+
+Repository Information:
+- Review Goal: {state["goal"]}
+- Primary Language: {state["language"]}
+- Framework: {state["framework"]}
+
+Retrieved Repository Context:
 {context}
 
-Return ONLY valid JSON with this exact structure:
-{{
-  "subsystems": [{{"name": "string", "purpose": "string", "keyFiles": ["string"]}}],
-  "workflow": [{{"step": "string", "description": "string"}}]
-}}
+Instructions:
 
-Identify 2-5 subsystems and a 4-7 step workflow based on the retrieved code.
+1. Use BOTH the metadata and source code while reasoning.
+2. Identify the major logical subsystems of the repository.
+3. Describe the purpose of each subsystem.
+4. List the most relevant files for each subsystem.
+5. Infer the application's execution workflow.
+6. If an entry point exists, begin the workflow from it.
+7. Ignore utility/helper functions unless they are architecturally important.
+8. Never invent files, modules, or functionality not present in the provided context.
+9. Base every conclusion only on the retrieved repository context.
+10. Keep subsystem names concise and descriptive.
+
+Return ONLY valid JSON using this exact schema:
+
+{{
+  "subsystems": [
+    {{
+      "name": "string",
+      "purpose": "string",
+      "keyFiles": ["string"]
+    }}
+  ],
+  "workflow": [
+    {{
+      "step": "string",
+      "description": "string"
+    }}
+  ]
+}}
 """
 
     fallback = {
         "subsystems": [
             {
                 "name": "Core Module",
-                "purpose": f"Primary logic for the {state['repo_name']} repository based on the review goal '{state['goal']}'.",
-                "keyFiles": [
-                    c["file"] for c in state["retrieved_chunks"][:5]
-                ] or ["N/A"],
+                "purpose": (
+                    f"Primary logic for the {state['repo_name']} "
+                    f"repository based on the review goal "
+                    f"'{state['goal']}'."
+                ),
+                "keyFiles": list(
+                    dict.fromkeys(
+                        c["file"]
+                        for c in state["retrieved_chunks"]
+                    )
+                )[:5] or ["N/A"],
             }
         ],
         "workflow": [
@@ -52,7 +93,22 @@ Identify 2-5 subsystems and a 4-7 step workflow based on the retrieved code.
         ],
     }
 
-    result = call_gemini_json(prompt, fallback)
+    result = call_gemini_json(
+        prompt,
+        fallback,
+    )
+
+    # -----------------------------
+    # Validate Response
+    # -----------------------------
+    if not isinstance(result, dict):
+        result = fallback
+
+    result.setdefault("subsystems", [])
+    result.setdefault("workflow", [])
+
+    result["subsystems"] = result["subsystems"][:5]
+    result["workflow"] = result["workflow"][:7]
 
     state["repository_understanding"] = result
 

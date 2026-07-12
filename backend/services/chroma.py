@@ -28,23 +28,56 @@ def index_chunks_in_chroma(job_id: str, chunks: List[Dict[str, Any]]):
         return collection
 
     texts = [c["content"] for c in chunks]
-
     embeddings = generate_embeddings(texts)
-
     ids = [c["id"] for c in chunks]
 
-    metadatas = [
-     {
-        "file": c["file"],
-        "language": c["language"],
-        "start_line": c["start_line"],
-        "end_line": c["end_line"],
-        "chunk_type": c.get("chunk_type", "generic"),
-        "function": c.get("function"),
-        "class": c.get("class"),
-     }
-     for c in chunks
-     ]
+    metadatas = []
+
+    for c in chunks:
+     metadatas.append(
+        {
+            "file": str(c.get("file", "")),
+            "language": str(c.get("language", "")),
+            "start_line": int(c.get("start_line", 0)),
+            "end_line": int(c.get("end_line", 0)),
+
+            "chunk_type": str(
+                c.get("chunk_type") or "generic"
+            ),
+
+            "function": str(
+                c.get("function") or ""
+            ),
+
+            "class": str(
+                c.get("class") or ""
+            ),
+
+            "imports": ",".join(
+                map(str, c.get("imports", []))
+            ),
+
+            "is_test": bool(
+                c.get("is_test", False)
+            ),
+
+            "is_config": bool(
+                c.get("is_config", False)
+            ),
+
+            "is_entrypoint": bool(
+                c.get("is_entrypoint", False)
+            ),
+
+            "is_api": bool(
+                c.get("is_api", False)
+            ),
+        }
+    )
+
+    print("Sample Metadata:")
+    print(metadatas[0])
+
     collection.add(
         ids=ids,
         embeddings=embeddings,
@@ -70,7 +103,7 @@ def retrieve_top_chunks(
 
         results = collection.query(
             query_embeddings=[query_embedding],
-            n_results=min(top_k, len(chunks)),
+          n_results=min(max(top_k, 8), len(chunks))
         )
 
         retrieved = []
@@ -80,17 +113,28 @@ def retrieve_top_chunks(
 
         for doc, meta in zip(docs, metas):
             retrieved.append(
-          {
-           "file": meta.get("file", "unknown"),
-           "language": meta.get("language", "Other"),
-           "start_line": meta.get("start_line", 0),
-           "end_line": meta.get("end_line", 0),
-           "chunk_type": meta.get("chunk_type", "generic"),
-           "function": meta.get("function"),
-           "class": meta.get("class"),
-           "content": doc,
-          }
+                {
+                    "file": meta.get("file", "unknown"),
+                    "language": meta.get("language", "Other"),
+                    "start_line": meta.get("start_line", 0),
+                    "end_line": meta.get("end_line", 0),
+                    "chunk_type": meta.get("chunk_type", "generic"),
+                    "function": meta.get("function"),
+                    "class": meta.get("class"),
 
+                    # New Metadata
+                    "imports": (
+                        meta.get("imports", "").split(",")
+                        if meta.get("imports")
+                        else []
+                    ),
+                    "is_test": meta.get("is_test") == "True",
+                    "is_config": meta.get("is_config") == "True",
+                    "is_entrypoint": meta.get("is_entrypoint") == "True",
+                    "is_api": meta.get("is_api") == "True",
+
+                    "content": doc,
+                }
             )
 
         return retrieved

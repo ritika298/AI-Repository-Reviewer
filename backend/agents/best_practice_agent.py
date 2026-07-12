@@ -4,6 +4,16 @@ from services.gemini import call_gemini_json
 from utils.formatter import format_chunks_for_prompt
 
 
+CATEGORIES = [
+    "Code Modularity",
+    "Naming Conventions",
+    "Error Handling",
+    "Documentation",
+    "Testing",
+    "Security Practices",
+]
+
+
 def best_practice_agent(state: SharedState) -> SharedState:
     update_progress(
         state["job_id"],
@@ -11,28 +21,57 @@ def best_practice_agent(state: SharedState) -> SharedState:
         "running",
     )
 
-    context = format_chunks_for_prompt(state["retrieved_chunks"])
+    context = format_chunks_for_prompt(
+        state["retrieved_chunks"]
+    )
 
-    prompt = f"""You are a code quality auditor.
+    prompt = f"""
+You are a Senior Software Quality Engineer.
 
-Evaluate the following code against software engineering best practices:
-naming conventions, error handling, documentation,
-modularity, testing, and security.
+Evaluate ONLY the provided repository context.
 
-{context}
+Do NOT search for issues outside the supplied code.
 
-Return ONLY valid JSON with this exact structure:
+Do NOT repeat bug detection.
+
+Do NOT describe architecture.
+
+Your task is ONLY to evaluate software engineering best practices.
+
+Evaluate EXACTLY these six categories:
+
+1. Code Modularity
+2. Naming Conventions
+3. Error Handling
+4. Documentation
+5. Testing
+6. Security Practices
+
+For each category:
+
+• PASS if generally followed.
+
+• FAIL if important improvements are needed.
+
+Keep details concise (1-2 sentences).
+
+Return ONLY valid JSON.
+
+Schema:
+
 {{
-  "bestPractices": [
-    {{
-      "category": "string",
-      "status": "PASSED|FAILED",
-      "details": "string"
-    }}
+  "bestPractices":[
+      {{
+          "category":"",
+          "status":"PASSED|FAILED",
+          "details":""
+      }}
   ]
 }}
 
-Provide 4-6 categories.
+Repository Context:
+
+{context}
 """
 
     fallback = {
@@ -40,50 +79,87 @@ Provide 4-6 categories.
             {
                 "category": "Code Modularity",
                 "status": "PASSED",
-                "details": "Code is organized into logical, well-separated modules.",
-            },
-            {
-                "category": "Error Handling",
-                "status": "FAILED",
-                "details": "Some functions lack sufficient exception handling.",
-            },
-            {
-                "category": "Documentation",
-                "status": "FAILED",
-                "details": "Several functions and classes are missing docstrings/comments.",
+                "details": "Code is organized into logical modules.",
             },
             {
                 "category": "Naming Conventions",
                 "status": "PASSED",
-                "details": "Variable and function names follow consistent conventions.",
+                "details": "Identifiers follow consistent naming conventions.",
+            },
+            {
+                "category": "Error Handling",
+                "status": "FAILED",
+                "details": "Exception handling can be improved.",
+            },
+            {
+                "category": "Documentation",
+                "status": "FAILED",
+                "details": "Some functions lack documentation.",
+            },
+            {
+                "category": "Testing",
+                "status": "FAILED",
+                "details": "Limited evidence of automated tests.",
+            },
+            {
+                "category": "Security Practices",
+                "status": "PASSED",
+                "details": "No obvious insecure coding practices detected in the reviewed context.",
             },
         ]
     }
 
-    result = call_gemini_json(prompt, fallback)
+    result = call_gemini_json(
+        prompt,
+        fallback,
+    )
 
-    practices = result.get("bestPractices", [])
+    if not isinstance(result, dict):
+        result = fallback
+
+    practices = result.get(
+        "bestPractices",
+        []
+    )
 
     normalized = []
 
-    for p in practices:
+    seen = set()
+
+    for category in CATEGORIES:
+
+        match = next(
+            (
+                p
+                for p in practices
+                if p.get("category") == category
+            ),
+            None,
+        )
+
+        if match is None:
+            match = {
+                "category": category,
+                "status": "FAILED",
+                "details": "No assessment generated.",
+            }
+
         status = str(
-            p.get("status", "FAILED")
+            match.get("status", "FAILED")
         ).upper()
 
-        if status not in (
-            "PASSED",
-            "FAILED",
-        ):
+        if status not in ("PASSED", "FAILED"):
             status = "FAILED"
 
         normalized.append(
             {
-                "category": p.get("category", "General"),
+                "category": category,
                 "status": status,
-                "details": p.get("details", ""),
+                "details": match.get("details", ""),
             }
         )
+
+        seen.add(category)
 
     state["best_practices"] = normalized
 

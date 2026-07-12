@@ -25,6 +25,60 @@ def create_chunk(
     if not chunk_text.strip():
         return
 
+    path = file_info["path"].lower()
+    imports = file_info["ast"].get("imports", [])
+
+    # -----------------------------
+    # Metadata Flags
+    # -----------------------------
+    is_test = (
+        "test" in path
+        or path.endswith("_test.py")
+        or path.startswith("test_")
+        or "/tests/" in path
+    )
+
+    is_config = (
+        path.endswith("requirements.txt")
+        or path.endswith("package.json")
+        or path.endswith("config.py")
+        or path.endswith("settings.py")
+        or path.endswith(".env")
+        or path.endswith(".yaml")
+        or path.endswith(".yml")
+        or path.endswith(".json")
+        or path.endswith(".toml")
+    )
+
+    is_entrypoint = (
+        path.endswith("main.py")
+        or path.endswith("app.py")
+        or path.endswith("server.py")
+        or path.endswith("manage.py")
+        or path.endswith("index.js")
+        or path.endswith("index.ts")
+    )
+
+    content_lower = chunk_text.lower()
+
+    is_api = any(
+        keyword in content_lower
+        for keyword in [
+            "@app.get",
+            "@app.post",
+            "@app.put",
+            "@app.delete",
+            "@router.get",
+            "@router.post",
+            "@router.put",
+            "@router.delete",
+            "apirouter(",
+            "router =",
+            "express(",
+            "flask(",
+        ]
+    )
+
     chunks.append(
         {
             "id": str(uuid.uuid4()),
@@ -35,6 +89,11 @@ def create_chunk(
             "chunk_type": chunk_type,
             "function": function_name,
             "class": class_name,
+            "imports": imports,
+            "is_test": is_test,
+            "is_config": is_config,
+            "is_entrypoint": is_entrypoint,
+            "is_api": is_api,
             "content": chunk_text[:2000],
         }
     )
@@ -66,7 +125,7 @@ def chunk_code(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         functions = ast_data.get("functions", [])
 
         # ===============================
-        # Semantic chunking (Functions)
+        # Semantic Chunking (Functions)
         # ===============================
         if functions:
             for func in functions:
@@ -83,11 +142,11 @@ def chunk_code(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 if len(chunks) >= MAX_CHUNKS:
                     return chunks
 
-            # Skip fallback chunking for this file
+            # Skip fixed-size chunking if function chunks exist
             continue
 
         # ===============================
-        # Fallback: Fixed-size chunking
+        # Fallback Fixed-size Chunking
         # ===============================
         step = CHUNK_LINES - CHUNK_OVERLAP
 
