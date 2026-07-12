@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 
 from core.config import (
     IGNORE_DIRS,
-    IGNORE_EXTENSIONS,
+
     LANGUAGE_MAP,
     FRAMEWORK_MARKERS,
     MAX_FILES,
@@ -15,11 +15,21 @@ from core.config import (
 def scan_repository(repo_path: str) -> List[Dict[str, Any]]:
     files_info = []
     for root, dirs, files in os.walk(repo_path):
-        dirs[:] = [d for d in dirs if d not in IGNORE_DIRS and not d.startswith(".")]
+        dirs[:] = [
+           d for d in dirs
+             if (
+              d not in IGNORE_DIRS
+              and not d.endswith(".egg-info")
+              and not d.startswith(".")
+             )
+        ]
         for fname in files:
             ext = Path(fname).suffix.lower()
-            if ext in IGNORE_EXTENSIONS:
-                continue
+            ext = Path(fname).suffix.lower()
+
+            # Only analyze supported files
+            if ext not in LANGUAGE_MAP:
+              continue
             full_path = os.path.join(root, fname)
             try:
                 size = os.path.getsize(full_path)
@@ -32,7 +42,7 @@ def scan_repository(repo_path: str) -> List[Dict[str, Any]]:
                 "path": rel_path,
                 "full_path": full_path,
                 "ext": ext,
-                "language": LANGUAGE_MAP.get(ext, "Other"),
+                "language": LANGUAGE_MAP.get(ext),
                 "size": size,
             })
             if len(files_info) >= MAX_FILES:

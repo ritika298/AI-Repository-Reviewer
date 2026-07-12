@@ -34,15 +34,17 @@ def index_chunks_in_chroma(job_id: str, chunks: List[Dict[str, Any]]):
     ids = [c["id"] for c in chunks]
 
     metadatas = [
-        {
-            "file": c["file"],
-            "start_line": c["start_line"],
-            "end_line": c["end_line"],
-            "language": c["language"],
-        }
-        for c in chunks
-    ]
-
+     {
+        "file": c["file"],
+        "language": c["language"],
+        "start_line": c["start_line"],
+        "end_line": c["end_line"],
+        "chunk_type": c.get("chunk_type", "generic"),
+        "function": c.get("function"),
+        "class": c.get("class"),
+     }
+     for c in chunks
+     ]
     collection.add(
         ids=ids,
         embeddings=embeddings,
@@ -78,13 +80,17 @@ def retrieve_top_chunks(
 
         for doc, meta in zip(docs, metas):
             retrieved.append(
-                {
-                    "file": meta.get("file", "unknown"),
-                    "language": meta.get("language", "Other"),
-                    "start_line": meta.get("start_line", 0),
-                    "end_line": meta.get("end_line", 0),
-                    "content": doc,
-                }
+          {
+           "file": meta.get("file", "unknown"),
+           "language": meta.get("language", "Other"),
+           "start_line": meta.get("start_line", 0),
+           "end_line": meta.get("end_line", 0),
+           "chunk_type": meta.get("chunk_type", "generic"),
+           "function": meta.get("function"),
+           "class": meta.get("class"),
+           "content": doc,
+          }
+
             )
 
         return retrieved

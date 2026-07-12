@@ -10,9 +10,21 @@ def extract_python_ast(content: str) -> Dict[str, Any]:
         tree = ast.parse(content)
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                functions.append(node.name)
+                functions.append(
+                 {
+                "name": node.name,
+                "start": node.lineno,
+                "end": getattr(node, "end_lineno", node.lineno),
+                 }
+                )
             elif isinstance(node, ast.ClassDef):
-                classes.append(node.name)
+                classes.append(
+                 {
+                  "name": node.name,
+                   "start": node.lineno,
+                   "end": getattr(node, "end_lineno", node.lineno),
+                  }
+                )
             elif isinstance(node, ast.Import):
                 imports.extend(alias.name for alias in node.names)
             elif isinstance(node, ast.ImportFrom):
