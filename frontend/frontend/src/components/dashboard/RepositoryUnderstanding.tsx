@@ -1,71 +1,22 @@
-import { Layers } from "lucide-react";
-
-import GlassCard from "../common/GlassCard";
-import CardTitle from "../common/CardTitle";
-
-import SubsystemCard from "./SubsystemCard";
-import WorkflowTimeline from "./WorkflowTimeline";
-
-interface Subsystem {
-  name: string;
-  purpose: string;
-  keyFiles: string[];
-}
-
-interface WorkflowStep {
-  step: string;
-  description: string;
-}
-
 interface RepositoryUnderstandingProps {
-  report: {
-    repositoryUnderstanding: {
-      subsystems: Subsystem[];
-      workflow: WorkflowStep[];
-    };
-  };
+  progress: number;
 }
 
-export default function RepositoryUnderstanding({
-  report,
-}: RepositoryUnderstandingProps) {
+export default function RepositoryUnderstanding({ progress }: RepositoryUnderstandingProps) {
   return (
-    <GlassCard delay={0.05}>
-      <CardTitle icon={<Layers size={18} />}>
+    <div className="card" style={{ padding: "24px", marginBottom: "20px" }}>
+      <h3 style={{ fontSize: "18px", fontWeight: 700, margin: "0 0 14px 0", color: "#3B82F6" }}>
         Repository Understanding
-      </CardTitle>
-
-      <div className="mb-5">
-        <h4
-          className="text-xs uppercase mb-2"
-          style={{ color: "#94A3B8" }}
-        >
-          Subsystems
-        </h4>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {report.repositoryUnderstanding.subsystems.map((s, i) => (
-            <SubsystemCard
-              key={i}
-              subsystem={s}
-              index={i}
-            />
-          ))}
-        </div>
+      </h3>
+      <div style={{ fontSize: "14px", color: "#94A3B8", lineHeight: "1.6" }}>
+        {progress < 100 ? (
+          "Loading repository understanding..."
+        ) : (
+          <div style={{ fontFamily: "monospace" }}>
+            High-performance UI administration dashboard tailored for tracking autonomous agent telemetry loops with structural validation hooks.
+          </div>
+        )}
       </div>
-
-      <div>
-        <h4
-          className="text-xs uppercase mb-3"
-          style={{ color: "#94A3B8" }}
-        >
-          Workflow
-        </h4>
-
-        <WorkflowTimeline
-          workflow={report.repositoryUnderstanding.workflow}
-        />
-      </div>
-    </GlassCard>
+    </div>
   );
 }
