@@ -36,7 +36,9 @@ def call_gemini_json(prompt: str, fallback: Dict[str, Any]) -> Dict[str, Any]:
 
         return json.loads(text)
 
-retrieved_chunks = retrieve_top_chunks(...)
+    except Exception:
+     return fallback
+    #hi
 
 
 def call_gemini_text(prompt: str, fallback: str) -> str:
