@@ -1,23 +1,62 @@
-interface ArchitectureCardProps {
-  progress: number;
+import { FolderTree } from "lucide-react";
+
+import GlassCard from "../common/GlassCard";
+import CardTitle from "../common/CardTitle";
+
+interface Architecture {
+  description: string;
+  diagram: string;
+  patterns: string[];
 }
 
-export default function ArchitectureCard({ progress }: ArchitectureCardProps) {
+interface ArchitectureCardProps {
+  report: {
+    architecture: Architecture;
+  };
+}
+
+export default function ArchitectureCard({
+  report,
+}: ArchitectureCardProps) {
   return (
-    <div className="card" style={{ padding: "24px", marginBottom: "20px" }}>
-      <h3 style={{ fontSize: "18px", fontWeight: 700, margin: "0 0 14px 0", color: "#3B82F6" }}>
+    <GlassCard delay={0.08}>
+      <CardTitle icon={<FolderTree size={18} />}>
         Architecture
-      </h3>
-      <div style={{ fontSize: "14px", color: "#94A3B8", lineHeight: "1.6" }}>
-        {progress < 100 ? (
-          "Loading architecture..."
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "monospace" }}>
-            <div><strong>Pattern:</strong> Layered MVC / Component-Driven Hybrid</div>
-            <div><strong>Flow:</strong> Unidirectional state pipeline linking sub-nodes dynamically.</div>
-          </div>
-        )}
+      </CardTitle>
+
+      <p
+        className="text-sm mb-3"
+        style={{ color: "#CBD5E1" }}
+      >
+        {report.architecture.description}
+      </p>
+
+      <pre
+        className="text-[12px] rounded-[14px] p-4 overflow-x-auto mb-3"
+        style={{
+          background: "rgba(0,0,0,0.3)",
+          color: "#66FCF1",
+          border: "1px solid rgba(97,218,251,0.10)",
+        }}
+      >
+        {report.architecture.diagram}
+      </pre>
+
+      <div className="flex flex-wrap gap-2">
+        {report.architecture.patterns.map((p, i) => (
+          <span
+            key={i}
+            className="text-[11px] px-2.5 py-1 rounded-full"
+            style={{
+              background: "rgba(79,209,197,0.10)",
+              color: "#4FD1C5",
+              border: "1px solid rgba(79,209,197,0.25)",
+            }}
+          >
+            {p}
+          </span>
+        ))}
       </div>
-    </div>
+    </GlassCard>
   );
 }
