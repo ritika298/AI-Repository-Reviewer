@@ -64,14 +64,58 @@ CLASS_PATTERNS = [
     r"struct\s+([A-Za-z0-9_]+)",
 ]
 
+def find_block_end(lines, start_line):
+    """
+    Finds the ending line of a brace-delimited block.
+    Works for Java, C, C++, C#, JavaScript, TypeScript, Go, PHP, Rust.
+    """
+
+    brace_count = 0
+    block_started = False
+
+    for i in range(start_line - 1, len(lines)):
+        line = lines[i]
+
+        for ch in line:
+            if ch == "{":
+                brace_count += 1
+                block_started = True
+
+            elif ch == "}":
+                brace_count -= 1
+
+                if block_started and brace_count == 0:
+                    return i + 1
+
+    return start_line
+
 IMPORT_PATTERNS = [
     r"import\s+.*?['\"]([^'\"]+)['\"]",
     r"require\(['\"]([^'\"]+)['\"]\)",
     r"^import\s+([\w\.]+)",
 ]
+BRACE_LANGUAGES = {
+    ".java",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".c",
+    ".cpp",
+    ".cc",
+    ".cxx",
+    ".h",
+    ".hpp",
+    ".cs",
+    ".go",
+    ".rs",
+    ".php",
+}
 
-
-def extract_generic_ast(content: str) -> Dict[str, Any]:
+def extract_generic_ast(
+    content: str,
+    file_info: Dict[str, Any],
+) -> Dict[str, Any]:
 
     functions = []
     classes = []
@@ -107,15 +151,20 @@ def extract_generic_ast(content: str) -> Dict[str, Any]:
 
             match = re.search(pattern, line)
 
-            if match:
-                classes.append(
-                    {
-                        "name": match.group(1),
-                        "start": lineno,
-                        "end": lineno,
-                    }
-                )
-                break
+        if match:
+            if file_info["ext"] in BRACE_LANGUAGES:
+                end_line = find_block_end(lines, lineno)
+            else:
+              end_line = lineno
+
+            functions.append(
+                 {
+               "name": match.group(1),
+               "start": lineno,
+               "end": end_line,
+             }
+              )   
+            break
 
     # -----------------------------
     # Imports
@@ -144,4 +193,4 @@ def extract_ast_metadata(
     if file_info["ext"] == ".py":
         return extract_python_ast(content)
 
-    return extract_generic_ast(content)
+    return extract_generic_ast(content, file_info)

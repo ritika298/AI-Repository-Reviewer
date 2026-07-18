@@ -110,8 +110,18 @@ def retrieve_top_chunks(
 
         docs = results.get("documents", [[]])[0]
         metas = results.get("metadatas", [[]])[0]
+        retrieved = []
+
+        file_counts = {}
+        MAX_CHUNKS_PER_FILE = 2
 
         for doc, meta in zip(docs, metas):
+            file = meta.get("file", "unknown")
+
+            if file_counts.get(file, 0) >= MAX_CHUNKS_PER_FILE:
+             continue
+
+            file_counts[file] = file_counts.get(file, 0) + 1
             retrieved.append(
                 {
                     "file": meta.get("file", "unknown"),

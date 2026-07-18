@@ -5,11 +5,14 @@ import GlassCard from "../common/GlassCard";
 import CardTitle from "../common/CardTitle";
 
 interface BugFinding {
-  file: string;
-  line: number;
   severity: "HIGH" | "MEDIUM" | "LOW";
   description: string;
   fix: string;
+
+  files: {
+    file: string;
+    line: number;
+  }[];
 }
 
 interface BugFindingsProps {
@@ -61,12 +64,18 @@ export default function BugFindings({
                     {bug.severity}
                   </span>
 
-                  <span
-                    className="text-[11px]"
-                    style={{ color: "#94A3B8" }}
-                  >
-                    {bug.file}:{bug.line}
-                  </span>
+                 <div
+                  className="text-[11px]"
+                  style={{ color: "#94A3B8" }}
+                 >
+                 <p className="font-semibold mb-1">Affected Files</p>
+
+                  {bug.files.map((f, idx) => (
+                 <div key={idx}>
+                 • {f.file}:{f.line}
+                  </div>
+                   ))}
+                   </div>
                 </div>
 
                 <p

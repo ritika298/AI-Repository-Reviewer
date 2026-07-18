@@ -124,11 +124,24 @@ def chunk_code(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         ast_data = file_info["ast"]
         functions = ast_data.get("functions", [])
 
+        # Keep only functions with a valid range
+        valid_functions = [
+            f
+           for f in functions
+           if f["end"] > f["start"]
+        ]
+
+# ===============================
+# Semantic Chunking (Functions)
+# ===============================
+        if valid_functions:
+        
+
         # ===============================
         # Semantic Chunking (Functions)
         # ===============================
-        if functions:
-            for func in functions:
+          if functions:
+            for func in valid_functions:
                 create_chunk(
                     chunks,
                     file_info,

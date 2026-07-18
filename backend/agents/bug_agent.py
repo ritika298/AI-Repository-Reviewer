@@ -11,9 +11,17 @@ def bug_agent(state: SharedState) -> SharedState:
         "running",
     )
 
-    context = format_chunks_for_prompt(
-        state["retrieved_chunks"]
-    )
+    bug_chunks = [
+    chunk
+    for chunk in state["retrieved_chunks"]
+    if chunk["language"] != "Markdown"
+    ]
+
+    if not bug_chunks:
+     bug_chunks = state["retrieved_chunks"]
+
+    context = format_chunks_for_prompt(bug_chunks)
+    
     print("\n===== BUG AGENT CONTEXT =====")
     print(context)
     print("=============================\n")
@@ -38,28 +46,21 @@ Do NOT:
 - Suggest best practices unless they directly fix a bug.
 - Report cosmetic issues.
 
-Analyze the code for:
+Review every retrieved function exactly as a senior software engineer reviewing a pull request.
 
-- Logic errors
-- Runtime exceptions
-- Null pointer / null reference issues
-- Memory leaks
-- Resource leaks
-- Race conditions
-- Deadlocks
-- Thread-safety issues
-- Security vulnerabilities
-- Missing input validation
-- Missing authentication or authorization
-- Missing error handling
-- Incorrect API usage
-- Buffer overflows or out-of-bounds access
-- Integer overflow
-- Division by zero
-- Infinite loops or infinite recursion
-- File or network resource leaks
-- Incorrect concurrency logic
+For each function:
 
+1. Understand what the function is trying to achieve.
+2. Trace the normal execution path.
+3. Trace invalid inputs and edge cases.
+4. Trace failure scenarios.
+5. Identify business logic flaws.
+6. Identify state consistency issues.
+7. Identify security vulnerabilities.
+8. Identify runtime failures.
+9. Only after reasoning through the code decide whether a bug exists.
+
+Prefer repository-specific defects over generic Java issues.
 
 Examples of valid findings:
 
@@ -79,24 +80,42 @@ Examples of valid findings:
 - Race condition caused by shared mutable state
 
 Guidelines:
-Guidelines:
 
-1. Report ONLY issues that are directly supported by the provided code.
+1. Report only issues supported by the retrieved code.
 
-2. Never infer missing code.
+2. If supporting code is missing but the visible code strongly suggests a problem,
+mark it as "Potential Issue" in the description.
 
-3. Never assume syntax errors outside the retrieved chunk. Never invent code or functionality that is not shown.
+3. Never invent classes, methods, or functionality.
 
-4. If required code is missing, do NOT report the issue.
+4. Prefer business logic defects over language-level observations.
 
-5. Prefer zero findings over speculative findings.
+5. Report one finding per underlying issue.
+If the same issue appears multiple times, combine it into a single finding and mention all affected locations.
 
-6. Every finding must reference visible evidence in the retrieved code.
+6. Avoid reporting generic try-catch or parseInt observations unless they have real impact.
 
-7. Do not report duplicate findings across multiple files unless they are independent issues.If one bug causes multiple symptoms, report it once with the most useful description.
+7. Every finding must reference visible evidence from the retrieved code.
 
-8. Prefer precision over recall.
+8. Prefer fewer high-quality findings over many generic ones.
 
+Examples of high-quality findings:
+
+✓ Duplicate course registration is possible.
+✓ Seat availability can become inconsistent under concurrent registrations.
+✓ Authorization relies only on the UI instead of server-side validation.
+✓ Database update is not transactional.
+✓ Missing rollback after partial failure.
+✓ Inconsistent state after exception.
+✓ Resource leak caused by unclosed database connection.
+✓ Null API response causes runtime failure.
+
+Avoid prioritizing findings like:
+✗ Missing try-catch
+✗ parseInt may throw NumberFormatException
+✗ Generic null pointer warnings
+
+unless they represent the primary issue.
 
 For every issue provide:
 
@@ -200,6 +219,7 @@ If no supported issues are found, return:
             bug["file"],
             bug["line"],
             bug["description"],
+            
         )
 
         if key in seen:

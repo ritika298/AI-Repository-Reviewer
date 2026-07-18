@@ -3,6 +3,35 @@ from typing import List, Dict, Any
 from models.schemas import SharedState
 from core.progress import update_progress
 
+def merge_duplicate_bugs(bugs):
+    grouped = {}
+
+    for bug in bugs:
+        key = (
+        bug.get("severity", "LOW"),
+         bug.get("description", "").strip().lower(),
+        bug.get("fix", "").strip().lower(),
+        )
+
+        if key not in grouped:
+            grouped[key] = {
+                "severity": bug["severity"],
+                "description": bug["description"],
+                "fix": bug["fix"],
+                "files": [],
+            }
+
+        file_entry = {
+        "file": bug.get("file", "Unknown"),
+        "line": bug.get("line", 0),   
+        }
+        
+
+        if file_entry not in grouped[key]["files"]:
+            grouped[key]["files"].append(file_entry)
+
+    return list(grouped.values())
+
 
 def compute_health_score(
     bugs: List[Dict[str, Any]],
@@ -12,21 +41,10 @@ def compute_health_score(
     Computes a deterministic repository health score.
     """
 
-    # Start with a perfect score
     score = 100
 
-    # Remove duplicate AI findings
-    unique_bugs = {
-        (
-            bug.get("file"),
-            bug.get("line"),
-            bug.get("description"),
-        ): bug
-        for bug in bugs
-    }.values()
-
     # Deduct points based on bug severity
-    for bug in unique_bugs:
+    for bug in bugs:
         severity = bug.get("severity", "LOW")
 
         if severity == "HIGH":
@@ -41,10 +59,7 @@ def compute_health_score(
         if practice["status"] == "FAILED":
             score -= 2
 
-    # Keep score between 0 and 100
-    score = max(0, min(100, score))
-
-    return score
+    return max(0, min(100, score))
 
 
 def get_health_grade(score: int) -> str:
@@ -67,9 +82,11 @@ def response_formatter(state: SharedState) -> SharedState:
         "running",
     )
 
+    merged_bugs = merge_duplicate_bugs(state["bugs"])
+
     health_score = compute_health_score(
-        state["bugs"],
-        state["best_practices"],
+      merged_bugs,
+     state["best_practices"],
     )
 
     state["health_score"] = health_score
@@ -77,9 +94,9 @@ def response_formatter(state: SharedState) -> SharedState:
     recommendations = []
 
     high_bugs = [
-        bug
-        for bug in state["bugs"]
-        if bug["severity"] == "HIGH"
+      bug
+      for bug in merged_bugs
+      if bug["severity"] == "HIGH"
     ]
 
     if high_bugs:
@@ -131,7 +148,7 @@ def response_formatter(state: SharedState) -> SharedState:
         "healthGrade": get_health_grade(health_score),
         "repositoryUnderstanding": state["repository_understanding"],
         "architecture": state["architecture"],
-        "bugs": state["bugs"],
+        "bugs": merged_bugs,
         "bestPractices": state["best_practices"],
         "recommendations": recommendations,
         "filesRetrievedByRag": files_retrieved,
@@ -154,3 +171,16 @@ def response_formatter(state: SharedState) -> SharedState:
     )
 
     return state
+
+# Your backend now returns:
+# {
+#   "severity": "HIGH",
+#   "description": "...",
+#   "fix": "...",
+#   "files": [
+#     {
+#       "file": "main.py",
+#       "line": 42
+#     }
+#   ]
+# }'''

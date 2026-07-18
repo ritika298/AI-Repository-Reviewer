@@ -23,7 +23,17 @@ const API_BASE = "http://localhost:8000";
 
 interface Subsystem { name: string; purpose: string; keyFiles: string[]; }
 interface WorkflowStep { step: string; description: string; }
-interface BugFinding { file: string; line: number; severity: "HIGH" | "MEDIUM" | "LOW"; description: string; fix: string; }
+interface BugFinding {
+  severity: "HIGH" | "MEDIUM" | "LOW";
+  description: string;
+  fix: string;
+
+  files: {
+    file: string;
+    line: number;
+  }[];
+}
+
 interface BestPractice { category: string; status: "PASSED" | "FAILED"; details: string; }
 interface Architecture { description: string; diagram: string; patterns: string[]; }
 interface Repository { name: string; language: string; framework: string; totalFiles: number; }
