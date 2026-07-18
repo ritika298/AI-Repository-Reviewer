@@ -1,3 +1,4 @@
+import LandingPage from "./components/landing/LandingPage";
 import ArchitectureCard from "./components/dashboard/ArchitectureCard";
 import RepositoryUnderstanding from "./components/dashboard/RepositoryUnderstanding";
 import RepositoryOverview from "./components/dashboard/RepositoryOverview";
@@ -156,73 +157,28 @@ export default function App() {
 
   const repoLabel = githubUrl || zipFile?.name || "";
 
-  return (
-    <div className="min-h-screen w-full" style={{ background: "#0B1220", color: "#F8FAFC" }}>
+ return ( 
+    <div  className="min-h-screen w-full"
+    style={{
+      color: "#F8FAFC",}}>
+        {(loading || report) && (
       <div
         className="fixed inset-0 pointer-events-none opacity-40"
         style={{ background: "radial-gradient(circle at 20% 10%, rgba(61,217,235,0.08), transparent 45%), radial-gradient(circle at 80% 90%, rgba(56,189,248,0.06), transparent 45%)" }}
       />
-
-      <header className="relative z-10 border-b px-6 py-4 flex items-center justify-between" style={{ borderColor: "rgba(97,218,251,0.12)" }}>
-        <div className="flex items-center gap-2">
-          <Sparkles size={22} style={{ color: "#3DD9EB" }} />
-          <h1 className="text-lg font-bold">Autonomous Repository Code Reviewer</h1>
-        </div>
-        <div className="flex items-center gap-3 text-xs" style={{ color: "#94A3B8" }}>
-          <span>Multi-Agent RAG Analysis</span>
-        </div>
-      </header>
-
-      <div className="relative z-10 px-6 py-5 flex flex-col lg:flex-row gap-4">
-        <div className="flex-1 flex flex-col md:flex-row gap-3">
-          <div className="flex items-center gap-2 flex-1 rounded-[14px] px-4 py-2.5" style={{ background: "rgba(18,30,48,0.72)", border: "1px solid rgba(97,218,251,0.12)" }}>
-            <GitBranch size={16} style={{ color: "#3DD9EB" }} />
-            <input
-              value={githubUrl}
-              onChange={(e) => setGithubUrl(e.target.value)}
-              placeholder="https://github.com/user/repository"
-              className="bg-transparent flex-1 outline-none text-sm"
-              style={{ color: "#F8FAFC" }}
-            />
-          </div>
-          <label className="flex items-center gap-2 rounded-[14px] px-4 py-2.5 cursor-pointer" style={{ background: "rgba(18,30,48,0.72)", border: "1px solid rgba(97,218,251,0.12)" }}>
-            <Upload size={16} style={{ color: "#3DD9EB" }} />
-            <span className="text-sm truncate max-w-[160px]" style={{ color: zipFile ? "#F8FAFC" : "#94A3B8" }}>
-              {zipFile ? zipFile.name : "Upload ZIP"}
-            </span>
-            <input type="file" accept=".zip" className="hidden" onChange={(e) => setZipFile(e.target.files?.[0] || null)} />
-          </label>
-          <input
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-            placeholder="Review goal (e.g. Review authentication)"
-            className="rounded-[14px] px-4 py-2.5 text-sm outline-none flex-1"
-            style={{ background: "rgba(18,30,48,0.72)", border: "1px solid rgba(97,218,251,0.12)", color: "#F8FAFC" }}
-          />
-          <motion.button
-            whileHover={{ scale: loading ? 1 : 1.03 }}
-            whileTap={{ scale: loading ? 1 : 0.97 }}
-            onClick={handleAnalyze}
-            disabled={loading}
-            className="rounded-[16px] px-6 py-2.5 text-sm font-semibold flex items-center gap-2 justify-center"
-            style={{
-              background: "linear-gradient(90deg, #3DD9EB, #38BDF8)",
-              color: "#0B1220",
-              opacity: loading ? 0.7 : 1,
-              boxShadow: "0 0 20px rgba(61,217,235,0.25)",
-            }}
-          >
-            {loading ? (
-              <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-                <Loader2 size={16} />
-              </motion.span>
-            ) : (
-              <ChevronRight size={16} />
-            )}
-            {loading ? "Analyzing..." : "Analyze Repository"}
-          </motion.button>
-        </div>
-      </div>
+)}
+      {!loading && !report && (
+  <LandingPage
+    githubUrl={githubUrl}
+    setGithubUrl={setGithubUrl}
+    zipFile={zipFile}
+    setZipFile={setZipFile}
+    goal={goal}
+    setGoal={setGoal}
+    loading={loading}
+    handleAnalyze={handleAnalyze}
+  />
+)}
 
       {error && (
         <div className="relative z-10 mx-6 mb-4 rounded-[14px] px-4 py-3 flex items-center gap-2 text-sm" style={{ background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.3)", color: "#EF4444" }}>
@@ -230,6 +186,7 @@ export default function App() {
         </div>
       )}
 
+      {(loading || report) && (
       <div className="relative z-10 max-w-[1700px] mx-auto px-8 pb-8">
         <div className="grid grid-cols-12 gap-6">
 
@@ -352,6 +309,7 @@ export default function App() {
       </div>
     </div>
 
-  </div>
+  )}
+   </div>
   );
 }
