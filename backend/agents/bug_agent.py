@@ -18,7 +18,7 @@ def bug_agent(state: SharedState) -> SharedState:
     print(context)
     print("=============================\n")
     prompt = f"""
-You are a Principal Software Engineer performing a professional code review.
+You are a Principal Software Engineer performing a professional code review focused ONLY on bug detection.
 
 Repository Information:
 - Repository: {state["repo_name"]}
@@ -29,35 +29,74 @@ Repository Information:
 Retrieved Repository Context:
 {context}
 
-Your responsibility is ONLY to identify bugs and reliability issues.
+Your responsibility is ONLY to identify bugs, runtime failures, security vulnerabilities, and reliability issues.
 
 Do NOT:
 - Review code style.
 - Review architecture.
 - Review documentation.
 - Suggest best practices unless they directly fix a bug.
+- Report cosmetic issues.
 
-Evaluate the code for:
+Analyze the code for:
 
 - Logic errors
 - Runtime exceptions
-- Null reference issues
-- Memory/resource leaks
-- Concurrency problems
+- Null pointer / null reference issues
+- Memory leaks
+- Resource leaks
+- Race conditions
+- Deadlocks
+- Thread-safety issues
 - Security vulnerabilities
 - Missing input validation
+- Missing authentication or authorization
 - Missing error handling
 - Incorrect API usage
-- Performance issues caused by incorrect logic
+- Buffer overflows or out-of-bounds access
+- Integer overflow
+- Division by zero
+- Infinite loops or infinite recursion
+- File or network resource leaks
+- Incorrect concurrency logic
+
+
+Examples of valid findings:
+
+- Missing null check
+- Missing bounds checking
+- Division by zero possibility
+- Dictionary/map access without existence check
+- Invalid thread count causing runtime failure
+- Memory allocated but never freed
+- File opened but never closed
+- Missing try/catch around risky operations
+- SQL injection
+- Command injection
+- Path traversal
+- Unsafe API usage
+- Hardcoded credentials
+- Race condition caused by shared mutable state
 
 Guidelines:
+Guidelines:
 
-1. Only report issues supported by the provided code.
-2. Never invent missing code or hidden behavior.
-3. If evidence is incomplete, clearly state that the issue is potential.
-4. Prefer precision over quantity.
-5. Ignore cosmetic issues.
-6. Do not report duplicate findings.
+1. Report ONLY issues that are directly supported by the provided code.
+
+2. Never infer missing code.
+
+3. Never assume syntax errors outside the retrieved chunk. Never invent code or functionality that is not shown.
+
+4. If required code is missing, do NOT report the issue.
+
+5. Prefer zero findings over speculative findings.
+
+6. Every finding must reference visible evidence in the retrieved code.
+
+7. Do not report duplicate findings across multiple files unless they are independent issues.If one bug causes multiple symptoms, report it once with the most useful description.
+
+8. Prefer precision over recall.
+
 
 For every issue provide:
 
@@ -66,22 +105,32 @@ For every issue provide:
 - severity (HIGH, MEDIUM, LOW)
 - description
 - fix
+Keep descriptions under 35 words.
+
+Keep fixes under 20 words.
+
+Avoid explaining language concepts.
+
+Only describe the actual issue.
 
 Severity Guidelines:
 
 HIGH
 - Security vulnerabilities
-- Crashes
+- Application crashes
+- Memory/resource leaks
 - Data corruption
-- Resource leaks
+- Race conditions causing incorrect behaviour
 
 MEDIUM
-- Incorrect logic
 - Missing validation
+- Incorrect logic
 - Exception handling issues
+- API misuse
+- Incorrect concurrency implementation
 
 LOW
-- Minor reliability or maintainability issues affecting correctness
+- Minor reliability issues affecting correctness
 
 Return ONLY valid JSON.
 
@@ -99,7 +148,7 @@ Schema:
   ]
 }}
 
-If no issues are supported by the provided context, return:
+If no supported issues are found, return:
 
 {{
   "bugs": []
@@ -111,9 +160,12 @@ If no issues are supported by the provided context, return:
     }
 
     result = call_gemini_json(
-        prompt,
-        fallback,
-    )
+    prompt,
+    fallback,
+)
+    print("\n===== BUG AGENT RESPONSE =====")
+    print(result)
+    print("=============================\n")
 
     if not isinstance(result, dict):
         result = fallback
@@ -155,6 +207,7 @@ If no issues are supported by the provided context, return:
 
         seen.add(key)
         normalized.append(bug)
+
 
     state["bugs"] = normalized
 

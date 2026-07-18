@@ -31,15 +31,18 @@ Retrieved Repository Context:
 Instructions:
 
 1. Use BOTH the metadata and source code while reasoning.
-2. Identify the major logical subsystems of the repository.
+2. Identify up to 5 major subsystems.
 3. Describe the purpose of each subsystem.
-4. List the most relevant files for each subsystem.
-5. Infer the application's execution workflow.
-6. If an entry point exists, begin the workflow from it.
-7. Ignore utility/helper functions unless they are architecturally important.
-8. Never invent files, modules, or functionality not present in the provided context.
-9. Base every conclusion only on the retrieved repository context.
-10. Keep subsystem names concise and descriptive.
+4.. Keep subsystem names under 4 words.
+5. Describe each subsystem in ONE-TWO concise sentence with all the meaningful context.
+6. List the most relevant files for each subsystem.
+7. Infer the application's execution workflow.
+8. Each workflow step should be a single sentence.
+9. If an entry point exists, begin the workflow from it.
+10. Ignore utility/helper functions unless they are architecturally important.
+11. Never invent files, modules, or functionality not present in the provided context.
+12. Base every conclusion only on the retrieved repository context.
+13. Keep subsystem names concise and descriptive.
 
 Return ONLY valid JSON using this exact schema:
 

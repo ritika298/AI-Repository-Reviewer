@@ -103,7 +103,7 @@ def retrieve_top_chunks(
 
         results = collection.query(
             query_embeddings=[query_embedding],
-          n_results=min(max(top_k, 8), len(chunks))
+          n_results=min(top_k, len(chunks))
         )
 
         retrieved = []

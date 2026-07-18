@@ -53,7 +53,11 @@ For each category:
 
 • FAIL if important improvements are needed.
 
-Keep details concise (1-2 sentences).
+ Keep details under 20 words.
+
+ Mention only the most important observation.
+
+ Avoid generic advice.
 
 Return ONLY valid JSON.
 

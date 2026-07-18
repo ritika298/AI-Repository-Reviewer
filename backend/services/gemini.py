@@ -27,7 +27,7 @@ def call_gemini_json(prompt: str, fallback: Dict[str, Any]) -> Dict[str, Any]:
             prompt,
             generation_config={
                 "response_mime_type": "application/json",
-                "temperature": 0.3,
+                "temperature": 0.4,
             },
         )
 
@@ -57,5 +57,15 @@ def call_gemini_text(prompt: str, fallback: str) -> str:
 
         return response.text.strip()
 
-    except Exception:
-        return fallback
+    except Exception as e:
+     print("\n===== GEMINI ERROR =====")
+     print(e)
+
+     try:
+        print(response.text)
+     except:
+        pass
+
+     print("========================")
+
+     return fallback

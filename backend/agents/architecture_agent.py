@@ -49,7 +49,7 @@ Your responsibilities:
    - Client-Server
    - Microservices
    - Monolith
-3. Produce a simple ASCII architecture diagram.
+3. Produce a compact ASCII diagram (maximum 10 lines).
 4. Identify major design patterns ONLY if supported by the provided code.
 5. Do NOT invent components or services that are not present.
 6. Use the repository understanding together with the retrieved code.
