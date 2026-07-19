@@ -56,7 +56,8 @@ export default function LandingPage({
       <p className="hero-text">
         Analyze GitHub repositories using specialized AI agents that understand
         architecture, detect bugs, review best practices, retrieve relevant
-        code using RAG, and generate detailed reports.
+        code using RAG, 
+        and generate detailed reports.
       </p>
 
       <motion.div
