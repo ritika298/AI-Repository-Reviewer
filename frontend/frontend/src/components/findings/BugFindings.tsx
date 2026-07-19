@@ -1,14 +1,15 @@
-import { motion } from "framer-motion";
-import { Bug } from "lucide-react";
+import {
+  AlertTriangle,
+  FileCode2,
+} from "lucide-react";
 
 import GlassCard from "../common/GlassCard";
 import CardTitle from "../common/CardTitle";
 
-interface BugFinding {
+interface Bug {
   severity: "HIGH" | "MEDIUM" | "LOW";
   description: string;
   fix: string;
-
   files: {
     file: string;
     line: number;
@@ -16,93 +17,172 @@ interface BugFinding {
 }
 
 interface BugFindingsProps {
-  bugs: BugFinding[];
-  severityColor: (
-    severity: string
-  ) => {
-    text: string;
-    bg: string;
-    border: string;
-  };
+  bugs: Bug[];
 }
 
 export default function BugFindings({
   bugs,
-  severityColor,
 }: BugFindingsProps) {
   return (
     <GlassCard>
-      <CardTitle icon={<Bug size={18} />}>
+      <CardTitle icon={<AlertTriangle size={18} />}>
         Bug Findings
       </CardTitle>
 
-      <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1">
-        {bugs.length > 0 ? (
-          bugs.map((bug, i) => {
-            const colors = severityColor(bug.severity);
+      <p
+        style={{
+          color: "#94A3B8",
+          marginTop: 8,
+          marginBottom: 28,
+          fontSize: 14,
+        }}
+      >
+        AI detected{" "}
+        <span style={{ color: "white", fontWeight: 600 }}>
+          {bugs.length}
+        </span>{" "}
+        potential issue{bugs.length !== 1 && "s"} requiring attention.
+      </p>
 
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.05 }}
-                className="rounded-[14px] p-3"
-                style={{
-                  background: colors.bg,
-                  border: `1px solid ${colors.border}`,
-                }}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span
-                    className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                    style={{
-                      color: colors.text,
-                      background: "rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    {bug.severity}
-                  </span>
+      {bugs.length === 0 ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "60px 0",
+            color: "#94A3B8",
+          }}
+        >
+          🎉 No bugs detected.
+        </div>
+      ) : (
+        <div>
+          {bugs.map((bug, index) => (
+            <BugRow
+              key={index}
+              bug={bug}
+              last={index === bugs.length - 1}
+            />
+          ))}
+        </div>
+      )}
+    </GlassCard>
+  );
+}
 
-                 <div
-                  className="text-[11px]"
-                  style={{ color: "#94A3B8" }}
-                 >
-                 <p className="font-semibold mb-1">Affected Files</p>
+function BugRow({
+  bug,
+  last,
+}: {
+  bug: Bug;
+  last: boolean;
+}) {
+  const colors = {
+    HIGH: "#EF4444",
+    MEDIUM: "#F59E0B",
+    LOW: "#22C55E",
+  };
 
-                  {bug.files.map((f, idx) => (
-                 <div key={idx}>
-                 • {f.file}:{f.line}
-                  </div>
-                   ))}
-                   </div>
-                </div>
+  return (
+    <div
+      style={{
+        padding: "24px 0",
+        borderBottom: last
+          ? "none"
+          : "1px solid rgba(148,163,184,.12)",
+      }}
+    >
+      {/* Top Row */}
 
-                <p
-                  className="text-[13px] mb-1"
-                  style={{ color: "#F8FAFC" }}
-                >
-                  {bug.description}
-                </p>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 16,
+          marginBottom: 18,
+          paddingLeft: "24px",
+          paddingRight: "24px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+          }}
+        >
+          {/* Severity */}
 
-                <p
-                  className="text-[12px]"
-                  style={{ color: "#94A3B8" }}
-                >
-                  Fix: {bug.fix}
-                </p>
-              </motion.div>
-            );
-          })
-        ) : (
-          <p
-            className="text-[13px]"
-            style={{ color: "#64748B" }}
+          <div
+            style={{
+              background: `${colors[bug.severity]}18`,
+              border: `1px solid ${colors[bug.severity]}55`,
+              color: colors[bug.severity],
+              padding: "6px 14px",
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 700,
+              minWidth: 90,
+              textAlign: "center",
+            }}
           >
-            No bugs detected yet.
-          </p>
+            {bug.severity}
+          </div>
+
+          {/* Title */}
+
+          <div
+            style={{
+              color: "white",
+              fontSize: 18,
+              fontWeight: 600,
+            }}
+          >
+            {bug.description}
+          </div>
+        </div>
+
+        {/* File */}
+
+        {bug.files[0] && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              background: "#172436",
+              border: "1px solid rgba(61,217,235,.12)",
+              borderRadius: 999,
+              padding: "6px 14px",
+              color: "#CBD5E1",
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            <FileCode2
+              size={14}
+              color="#38BDF8"
+            />
+
+            {bug.files[0].file}:{bug.files[0].line}
+          </div>
         )}
       </div>
-    </GlassCard>
+
+      {/* Fix */}
+
+      <p
+        style={{
+          color: "#94A3B8",
+          fontSize: 14,
+          lineHeight: 1.7,
+              paddingLeft: "170px",
+    paddingRight: "24px",
+        }}
+      >
+        {bug.fix}
+      </p>
+    </div>
   );
 }

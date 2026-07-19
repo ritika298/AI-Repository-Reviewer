@@ -1,23 +1,20 @@
+import Dashboard from "./components/dashboard/Dashboard";
+
+
+//import demoReport from "./demo/demoReport";
+import AnalysisLoading from "./components/loading/AnalysisLoading";
 import LandingPage from "./components/landing/LandingPage";
-import ArchitectureCard from "./components/dashboard/ArchitectureCard";
-import RepositoryUnderstanding from "./components/dashboard/RepositoryUnderstanding";
-import RepositoryOverview from "./components/dashboard/RepositoryOverview";
-import RepoStatisticsCard from "./components/sidebar/RepoStatisticsCard";
-import AgentsCard from "./components/sidebar/AgentsCard";
+
+
 import AIThinking from "./components/sidebar/AIThinking";
-import AnalysisConfigCard from "./components/sidebar/AnalysisConfigCard";
-import RepoStatusCard from "./components/sidebar/RepoStatusCard";
-import PipelineSidebar from "./components/sidebar/PipelineSidebar";
-import BugFindings from "./components/findings/BugFindings";
-import CardTitle from "./components/common/CardTitle";
-import GlassCard from "./components/common/GlassCard";
+
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
-    Loader2, GitBranch, Upload, FileCode2,
-  AlertTriangle, ShieldCheck, ShieldAlert, Sparkles,
-   FileSearch, Bot,
-  ChevronRight, XCircle
+  
+   Loader2,
+    Bot,
+   XCircle
 } from "lucide-react";
 
 const API_BASE = "http://localhost:8000";
@@ -74,13 +71,6 @@ const DEFAULT_STEPS: PipelineStep[] = [
   { key: "report_generated", label: "Report Generated", status: "waiting" },
 ];
 
-function severityColor(severity: string) {
-  switch (severity) {
-    case "HIGH": return { text: "#FB7185", bg: "rgba(251,113,133,0.12)", border: "rgba(251,113,133,0.35)" };
-    case "MEDIUM": return { text: "#F59E0B", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.35)" };
-    default: return { text: "#22C55E", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.35)" };
-  }
-}
 
 export default function App() {
   const [githubUrl, setGithubUrl] = useState("");
@@ -155,161 +145,77 @@ export default function App() {
     }
   };
 
-  const repoLabel = githubUrl || zipFile?.name || "";
+ 
+const currentReport = report ?? report;
 
- return ( 
-    <div  className="min-h-screen w-full"
-    style={{
-      color: "#F8FAFC",}}>
-        {(loading || report) && (
+return (
+  <div
+    className="min-h-screen w-full"
+    style={{ color: "#F8FAFC" }}
+  >
+    {(loading || report) && (
       <div
         className="fixed inset-0 pointer-events-none opacity-40"
-        style={{ background: "radial-gradient(circle at 20% 10%, rgba(61,217,235,0.08), transparent 45%), radial-gradient(circle at 80% 90%, rgba(56,189,248,0.06), transparent 45%)" }}
+        style={{
+          background:
+            "radial-gradient(circle at 20% 10%, rgba(61,217,235,0.08), transparent 45%), radial-gradient(circle at 80% 90%, rgba(56,189,248,0.06), transparent 45%)",
+        }}
       />
-)}
-      {!loading && !report && (
-  <LandingPage
-    githubUrl={githubUrl}
-    setGithubUrl={setGithubUrl}
-    zipFile={zipFile}
-    setZipFile={setZipFile}
-    goal={goal}
-    setGoal={setGoal}
-    loading={loading}
-    handleAnalyze={handleAnalyze}
-  />
-)}
+    )}
 
-      {error && (
-        <div className="relative z-10 mx-6 mb-4 rounded-[14px] px-4 py-3 flex items-center gap-2 text-sm" style={{ background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.3)", color: "#EF4444" }}>
-          <XCircle size={16} /> {error}
-        </div>
-      )}
-
-      {(loading || report) && (
-      <div className="relative z-10 max-w-[1700px] mx-auto px-8 pb-8">
-        <div className="grid grid-cols-12 gap-6">
-
-          <div className="col-span-12 xl:col-span-3 flex flex-col gap-5">
-            <PipelineSidebar steps={steps} />
-            <RepoStatusCard
-              repoLabel={repoLabel}
-              loading={loading}
-              done={!!report}
-            />
-            <AnalysisConfigCard goal={goal} />
-          </div>
-
-          <div className="col-span-12 xl:col-span-6 flex flex-col gap-5">
-            <AnimatePresence>
-              {loading && !report && <AIThinking
-                steps={steps}
-                AGENT_KEYS={AGENT_KEYS}
-                AGENT_LABELS={AGENT_LABELS}
-              />}
-            </AnimatePresence>
-
-            {report ? (
-              <>
-
-                <RepositoryOverview report={report} />
-                <RepositoryUnderstanding report={report} />
-
-                <ArchitectureCard report={report} />
-              </>
-            ) : (
-              !loading && (
-                <GlassCard>
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <Bot size={40} style={{ color: "#3DD9EB" }} className="mb-4" />
-                    <p className="text-sm" style={{ color: "#94A3B8" }}>
-                      Enter a GitHub URL or upload a ZIP file to begin an autonomous multi-agent code review.
-                    </p>
-                  </div>
-                </GlassCard>
-              )
-            )}
-          </div>
-
-          <div className="col-span-12 xl:col-span-3 flex flex-col gap-5">
-             <BugFindings
-    bugs={report?.bugs ?? []}
-    severityColor={severityColor}
-  /> 
-
-            <GlassCard delay={0.03}>
-              <CardTitle icon={<ShieldCheck size={18} />}>Best Practices</CardTitle>
-              <div className="space-y-3">
-                {report && report.bestPractices.length > 0 ? (
-                  report.bestPractices.map((p, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      {p.status === "PASSED" ? (
-                        <ShieldCheck size={16} style={{ color: "#22C55E" }} className="mt-0.5 shrink-0" />
-                      ) : (
-                        <ShieldAlert size={16} style={{ color: "#F59E0B" }} className="mt-0.5 shrink-0" />
-                      )}
-                      <div>
-                        <p className="text-[13px] font-medium" style={{ color: "#F8FAFC" }}>{p.category}</p>
-                        <p className="text-[12px]" style={{ color: "#94A3B8" }}>{p.details}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-[13px]" style={{ color: "#64748B" }}>No data yet.</p>
-                )}
-              </div>
-            </GlassCard>
-
-            <GlassCard delay={0.06}>
-              <CardTitle icon={<AlertTriangle size={18} />}>Recommendations</CardTitle>
-              <ul className="space-y-2">
-                {report && report.recommendations.length > 0 ? (
-                  report.recommendations.map((r, i) => (
-                    <li key={i} className="text-[13px] flex gap-2" style={{ color: "#CBD5E1" }}>
-                      <span style={{ color: "#3DD9EB" }}>›</span> {r}
-                    </li>
-                  ))
-                ) : (
-                  <p className="text-[13px]" style={{ color: "#64748B" }}>No data yet.</p>
-                )}
-              </ul>
-            </GlassCard>
-
-            <GlassCard delay={0.09}>
-              <CardTitle icon={<FileSearch size={18} />}>Files Retrieved by RAG</CardTitle>
-              <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
-                {report && report.filesRetrievedByRag.length > 0 ? (
-                  report.filesRetrievedByRag.map((f, i) => (
-                    <motion.div
-                      key={i}
-                      whileHover={{ x: 3, background: "rgba(61,217,235,0.08)" }}
-                      className="flex items-center gap-2 rounded-[10px] px-2 py-1.5 text-[13px]"
-                      style={{ color: "#CBD5E1" }}
-                    >
-                      <FileCode2 size={14} style={{ color: "#3DD9EB" }} />
-                      <span className="truncate">{f}</span>
-                    </motion.div>
-                  ))
-                ) : (
-                  <p className="text-[13px]" style={{ color: "#64748B" }}>No files retrieved yet.</p>
-                )}
-              </div>
-              <p className="text-[11px] mt-3" style={{ color: "#64748B" }}>
-                Only the most relevant files are retrieved using semantic search.
-              </p>
-            </GlassCard>
-
-            <AgentsCard
-              steps={steps}
-              AGENT_KEYS={AGENT_KEYS}
-              AGENT_LABELS={AGENT_LABELS}
-            />
-                      <RepoStatisticsCard report={report} elapsedMs={elapsedMs} />
-        </div>
+    {error && (
+      <div
+        className="relative z-10 mx-6 mb-4 rounded-[14px] px-4 py-3 flex items-center gap-2 text-sm"
+        style={{
+          background: "rgba(239,68,68,0.10)",
+          border: "1px solid rgba(239,68,68,0.3)",
+          color: "#EF4444",
+        }}
+      >
+        <XCircle size={16} />
+        {error}
       </div>
-    </div>
+    )}
 
-  )}
-   </div>
-  );
+    {!loading && !report && (
+      <LandingPage
+        githubUrl={githubUrl}
+        setGithubUrl={setGithubUrl}
+        zipFile={zipFile}
+        setZipFile={setZipFile}
+        goal={goal}
+        setGoal={setGoal}
+        loading={loading}
+        handleAnalyze={handleAnalyze}
+      />
+    )}
+
+    {loading && !report && (
+      <>
+        <AnalysisLoading />
+
+        <AnimatePresence>
+          <AIThinking
+            steps={steps}
+            AGENT_KEYS={AGENT_KEYS}
+            AGENT_LABELS={AGENT_LABELS}
+          />
+        </AnimatePresence>
+      </>
+    )}
+
+    {!loading && currentReport && (
+      <Dashboard
+        report={currentReport}
+        goal={goal}
+        elapsedMs={elapsedMs}
+        onAnalyzeAgain={() => {
+          setReport(null);
+          setGithubUrl("");
+          setZipFile(null);
+        }}
+      />
+    )}
+  </div>
+);
 }
