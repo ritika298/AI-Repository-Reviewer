@@ -1,7 +1,7 @@
 import Dashboard from "./components/dashboard/Dashboard";
 
 
-//import demoReport from "./demo/demoReport";
+import demoReport from "./demo/demoReport";
 import AnalysisLoading from "./components/loading/AnalysisLoading";
 import LandingPage from "./components/landing/LandingPage";
 
@@ -71,6 +71,7 @@ const DEFAULT_STEPS: PipelineStep[] = [
   { key: "report_generated", label: "Report Generated", status: "waiting" },
 ];
 
+const DEV_MODE = true;
 
 export default function App() {
   const [githubUrl, setGithubUrl] = useState("");
@@ -146,22 +147,26 @@ export default function App() {
   };
 
  
-const currentReport = report ?? report;
+const currentReport = DEV_MODE ? demoReport : report;
 
 return (
   <div
-    className="min-h-screen w-full"
-    style={{ color: "#F8FAFC" }}
+    className="min-h-screen w-full relative overflow-hidden"
+    style={{
+      color: "#F8FAFC",
+      background: `
+        radial-gradient(circle at 15% 10%, rgba(61,217,235,.12), transparent 35%),
+        radial-gradient(circle at 85% 20%, rgba(59,130,246,.10), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(14,165,233,.08), transparent 45%),
+        linear-gradient(
+          180deg,
+          #07111F 0%,
+          #081827 40%,
+          #0A1D2E 100%
+        )
+      `,
+    }}
   >
-    {(loading || report) && (
-      <div
-        className="fixed inset-0 pointer-events-none opacity-40"
-        style={{
-          background:
-            "radial-gradient(circle at 20% 10%, rgba(61,217,235,0.08), transparent 45%), radial-gradient(circle at 80% 90%, rgba(56,189,248,0.06), transparent 45%)",
-        }}
-      />
-    )}
 
     {error && (
       <div
@@ -177,7 +182,7 @@ return (
       </div>
     )}
 
-    {!loading && !report && (
+    {loading && !currentReport && (
       <LandingPage
         githubUrl={githubUrl}
         setGithubUrl={setGithubUrl}
@@ -190,7 +195,19 @@ return (
       />
     )}
 
-    {loading && !report && (
+    {loading && !currentReport && (
+  <>
+    <AnalysisLoading />
+    <AnimatePresence>
+      <AIThinking
+        steps={steps}
+        AGENT_KEYS={AGENT_KEYS}
+        AGENT_LABELS={AGENT_LABELS}
+      />
+    </AnimatePresence>
+  </>
+)}
+    {loading && !currentReport && (
       <>
         <AnalysisLoading />
 

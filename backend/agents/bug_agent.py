@@ -140,6 +140,8 @@ HIGH
 - Memory/resource leaks
 - Data corruption
 - Race conditions causing incorrect behaviour
+- Resource leaks
+
 
 MEDIUM
 - Missing validation
@@ -149,7 +151,13 @@ MEDIUM
 - Incorrect concurrency implementation
 
 LOW
-- Minor reliability issues affecting correctness
+- Minor reliability issues
+- Non-critical edge case handling
+- Missing validation for uncommon inputs
+- Weak error messages
+- Minor resource handling issues
+- Inconsistent return values
+- Minor correctness issues that do not crash the application
 
 Return ONLY valid JSON.
 

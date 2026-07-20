@@ -5,6 +5,7 @@ import {
   Upload,
   Loader2,
   ChevronRight,
+  Bot,
 } from "lucide-react";
 
 interface LandingPageProps {
@@ -56,8 +57,7 @@ export default function LandingPage({
       <p className="hero-text">
         Analyze GitHub repositories using specialized AI agents that understand
         architecture, detect bugs, review best practices, retrieve relevant
-        code using RAG, 
-        and generate detailed reports.
+        code using RAG,and generate detailed reports.
       </p>
 
       <motion.div
@@ -119,18 +119,15 @@ export default function LandingPage({
 
           {loading ? (
             <>
-              <Loader2
-                size={18}
-                className="animate-spin"
-              />
-              &nbsp;Analyzing...
+              <Loader2 size={18} className="animate-spin" />
+               Analyzing...
             </>
           ) : (
-            <>
-              <ChevronRight size={18} />
-              &nbsp;Analyze Repository
-            </>
-          )}
+             <>
+              <Sparkles size={18} />
+               Analyze Repository
+              </>
+            )}
 
         </motion.button>
 

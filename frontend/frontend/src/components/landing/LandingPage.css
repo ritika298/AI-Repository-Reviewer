@@ -228,18 +228,22 @@
 
     padding:18px;
 
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
     font-size:18px;
 
     font-weight:700;
 
     color:white;
 
-    background:
-    linear-gradient(
-    90deg,
-    #2563EB,
-    #38BDF8
-     );
+    background:linear-gradient(
+        90deg,
+        #2563EB,
+        #38BDF8
+    );
 
     cursor:pointer;
 
