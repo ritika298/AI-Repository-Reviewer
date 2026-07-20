@@ -28,47 +28,83 @@ export default function RepositoryOverview({
 }: RepositoryOverviewProps) {
   return (
     <GlassCard>
-      <div
+     <div
   style={{
-    paddingTop: 10,
-    marginBottom: 12,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    textAlign: "center",
+    paddingTop: 8,
+    marginBottom: 26,
   }}
 >
-  <CardTitle icon={<GitBranch size={18} />}>
+  <CardTitle icon={<GitBranch size={25} />}>
+   <div
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  }}
+>
+  <h3
+    style={{
+      margin: 0,
+      color: "#F8FAFC",
+      fontSize: 18,
+      fontWeight: 700,
+      letterSpacing: ".3px",
+    }}
+  >
     Repository Overview
-  </CardTitle>
+  </h3>
+
+  <div
+    style={{
+      width: 230,
+      height:2,
+      borderRadius: 999,
+      marginTop: 8,
+      background: "linear-gradient(90deg,#3DD9EB,#22C55E)",
+    }}
+  />
 </div>
 
-      <div style={{ marginTop: 14 }}>
-        <h1
-          style={{
-            fontSize: 30,
-            fontWeight: 700,
-            color: "white",
-            marginBottom: 6,
-            lineHeight: 1.15,
-          }}
-        >
-          {report.repository.name}
-        </h1>
+  </CardTitle>
 
-        <p
-          style={{
-            color: "#94A3B8",
-            fontSize: 15,
-            marginBottom: 20,
-            lineHeight: 1.5,
-          }}
-        >
-          AI-powered repository architecture and quality analysis.
-        </p>
+  <h1
+    style={{
+      fontSize: 42,
+      fontWeight: 800,
+      color: "white",
+      marginTop: 6,
+      marginBottom: 8,
+      lineHeight: 1.1,
+      letterSpacing: "-0.9px",
+    }}
+  >
+    {report.repository.name}
+  </h1>
 
+  <p
+    style={{
+      color: "#94A3B8",
+      fontSize: 16,
+      maxWidth: 620,
+      lineHeight: 1.6,
+      margin: 0,
+    }}
+  >
+    AI-powered repository architecture and quality analysis.
+  </p>
+</div>
+
+<div>
         <div
   style={{
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 380px))",
     justifyContent: "center",
-    gap: 12,
+    gap: 16,
     margin: "0 auto",
     width: "95%",
   }}
@@ -100,7 +136,8 @@ export default function RepositoryOverview({
 
         <div
           style={{
-            marginTop: 18,
+             margin: "28px auto 0",
+    width: "95%",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -169,7 +206,7 @@ function InfoCard({
         borderRadius: 12,
         padding: "12px 16px",
         border: "1px solid rgba(61,217,235,.08)",
-        minHeight: 62,
+        minHeight: 60,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",

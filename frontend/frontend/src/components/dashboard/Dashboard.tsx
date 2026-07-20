@@ -7,6 +7,10 @@ import RepositoryUnderstanding from "./RepositoryUnderstanding";
 import ArchitectureCard from "./ArchitectureCard";
 import BugFindings from "../findings/BugFindings";
 import RagFiles from "../findings/RagFiles";
+import WorkflowTimeline from "./WorkflowTimeline";
+import GlassCard from "../common/GlassCard";
+import CardTitle from "../common/CardTitle";
+import { GitBranch } from "lucide-react";
  //import BugFindings from "../findings/BugFindings";
 //import BestPractices from "../findings/BestPractices";
 //import Recommendations from "../findings/Recommendations";
@@ -68,11 +72,33 @@ export default function Dashboard({
 
       {/* Repository Understanding */}
 
+      
       <RepositoryUnderstanding report={report} />
+  <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "28px",
+    marginTop: "30px",
+    alignItems: "stretch",
+  }}
+>
 
-      {/* Architecture */}
+  <GlassCard>
+    <div style={{ padding: "4px 4px 0" }}>
+    
 
-      <ArchitectureCard report={report} />
+      <div style={{ marginTop: "20px" }}>
+        <WorkflowTimeline
+          workflow={report.repositoryUnderstanding.workflow}
+        />
+      </div>
+    </div>
+  </GlassCard>
+
+  <ArchitectureCard report={report} />
+</div>
+
 
       {/* Bug Findings */}
 
@@ -105,13 +131,13 @@ export default function Dashboard({
   <BestPractices
     bestPractices={report.bestPractices}
   />
-</div>
+    </div>
 
-      {/* Analysis Configuration */}
+      {/* Analysis Configuration 
 
       <AnalysisConfigCard
         goal={goal}
-      />
+      />*/}
 
     </div>
   );

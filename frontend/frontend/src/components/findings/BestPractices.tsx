@@ -1,12 +1,6 @@
-import {
-  ShieldCheck,
-  ShieldAlert,
-  CheckCircle2,
-  AlertTriangle,
-} from "lucide-react";
-
+import { ShieldCheck } from "lucide-react";
 import GlassCard from "../common/GlassCard";
-import CardTitle from "../common/CardTitle";
+import { motion } from "framer-motion";
 
 interface BestPractice {
   category: string;
@@ -23,38 +17,83 @@ export default function BestPractices({
 }: BestPracticesProps) {
   return (
     <GlassCard>
-      <CardTitle icon={<ShieldCheck size={18} />}>
-        Best Practices
-      </CardTitle>
+      {/* Header */}
 
-      <p
+      <div
         style={{
-          color: "#94A3B8",
-          marginTop: 8,
-          marginBottom: 24,
-          fontSize: 14,
+          marginBottom: 28,
         }}
       >
-        AI evaluated engineering standards and coding practices.
-      </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+          }}
+        >
+          <ShieldCheck
+            size={28}
+            color="#38BDF8"
+          />
+
+          <h2
+            style={{
+              margin: 0,
+              color: "#F8FAFC",
+              fontSize: 32,
+              fontWeight: 800,
+              letterSpacing: "-0.6px",
+            }}
+          >
+            Best Practices
+          </h2>
+        </div>
+
+        <div
+          style={{
+            width: "100%",
+            height: 2,
+            margin: "18px 0",
+            borderRadius: 999,
+            background:
+              "linear-gradient(90deg,#38BDF8,#22C55E,transparent)",
+          }}
+        />
+
+        <p
+          style={{
+            margin: 0,
+            color: "#94A3B8",
+            fontSize: 15,
+            lineHeight: 1.65,
+          }}
+        >
+          AI evaluated engineering standards and coding practices across the repository.
+        </p>
+      </div>
 
       {bestPractices.length === 0 ? (
         <div
           style={{
             textAlign: "center",
-            padding: "50px 0",
+            padding: "60px 0",
             color: "#94A3B8",
           }}
         >
           No best practice data available.
         </div>
       ) : (
-        <div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2,minmax(0,1fr))",
+            gap: 18,
+          }}
+        >
           {bestPractices.map((practice, index) => (
-            <PracticeRow
+            <PracticeCard
               key={index}
               practice={practice}
-              last={index === bestPractices.length - 1}
             />
           ))}
         </div>
@@ -63,97 +102,52 @@ export default function BestPractices({
   );
 }
 
-function PracticeRow({
+function PracticeCard({
   practice,
-  last,
 }: {
   practice: BestPractice;
-  last: boolean;
 }) {
   const passed = practice.status === "PASSED";
 
   return (
-    <div
+    <motion.div
+      whileHover={{
+        y: -3,
+        borderColor: "rgba(61,217,235,.18)",
+      }}
+      transition={{
+        duration: 0.25,
+      }}
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 20,
-        padding: "22px 40px",
-        borderBottom: last
-          ? "none"
-          : "1px solid rgba(148,163,184,.12)",
+        background: "#172436",
+        borderRadius: 18,
+        border: "1px solid rgba(61,217,235,.08)",
+        borderLeft: `5px solid ${
+          passed ? "#22C55E" : "#EF4444"
+        }`,
+        padding: "20px",
       }}
     >
-      {/* Status Icon */}
-
       <div
         style={{
-          color: passed ? "#22C55E" : "#F59E0B",
-          flexShrink: 0,
-        }}
-      >
-        {passed ? (
-          <CheckCircle2 size={20} />
-        ) : (
-          <AlertTriangle size={20} />
-        )}
-      </div>
-
-      {/* Text */}
-
-      <div
-        style={{
-          width: "55%",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            color: "white",
-            fontWeight: 600,
-            fontSize: 17,
-            marginBottom: 6,
-          }}
-        >
-          {practice.category}
-        </div>
-
-        <div
-          style={{
-            color: "#94A3B8",
-            fontSize: 14,
-            lineHeight: 1.6,
-          }}
-        >
-          {practice.details}
-        </div>
-      </div>
-
-      {/* Badge */}
-
-      <div
-        style={{
-          background: passed
-            ? "rgba(34,197,94,.12)"
-            : "rgba(245,158,11,.12)",
-          border: `1px solid ${
-            passed
-              ? "rgba(34,197,94,.25)"
-              : "rgba(245,158,11,.25)"
-          }`,
-          color: passed ? "#22C55E" : "#F59E0B",
-          padding: "8px 18px",
-          borderRadius: 999,
+          color: "#F8FAFC",
           fontWeight: 700,
-          fontSize: 12,
-          minWidth: 95,
-          textAlign: "center",
-          flexShrink: 0,
+          fontSize: 20,
+          marginBottom: 12,
         }}
       >
-        {practice.status}
+        {practice.category}
       </div>
-    </div>
+
+      <div
+        style={{
+          color: "#94A3B8",
+          fontSize: 14,
+          lineHeight: 1.7,
+        }}
+      >
+        {practice.details}
+      </div>
+    </motion.div>
   );
 }

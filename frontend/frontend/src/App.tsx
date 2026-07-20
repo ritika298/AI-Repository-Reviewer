@@ -1,7 +1,7 @@
 import Dashboard from "./components/dashboard/Dashboard";
 
 
-import demoReport from "./demo/demoReport";
+//import demoReport from "./demo/demoReport";
 import AnalysisLoading from "./components/loading/AnalysisLoading";
 import LandingPage from "./components/landing/LandingPage";
 
@@ -71,7 +71,6 @@ const DEFAULT_STEPS: PipelineStep[] = [
   { key: "report_generated", label: "Report Generated", status: "waiting" },
 ];
 
-const DEV_MODE = true;
 
 export default function App() {
   const [githubUrl, setGithubUrl] = useState("");
@@ -147,7 +146,7 @@ export default function App() {
   };
 
  
-const currentReport = DEV_MODE ? demoReport : report;
+const currentReport = report;
 
 return (
   <div
@@ -182,7 +181,7 @@ return (
       </div>
     )}
 
-    {loading && !currentReport && (
+    {!loading && !currentReport && (
       <LandingPage
         githubUrl={githubUrl}
         setGithubUrl={setGithubUrl}
@@ -195,18 +194,7 @@ return (
       />
     )}
 
-    {loading && !currentReport && (
-  <>
-    <AnalysisLoading />
-    <AnimatePresence>
-      <AIThinking
-        steps={steps}
-        AGENT_KEYS={AGENT_KEYS}
-        AGENT_LABELS={AGENT_LABELS}
-      />
-    </AnimatePresence>
-  </>
-)}
+   
     {loading && !currentReport && (
       <>
         <AnalysisLoading />
