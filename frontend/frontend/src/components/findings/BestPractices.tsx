@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 
 interface BestPractice {
   category: string;
-  status: "PASSED" | "FAILED";
   details: string;
 }
 
@@ -33,14 +32,14 @@ export default function BestPractices({
         >
           <ShieldCheck
             size={28}
-            color="#38BDF8"
+            color="#22C55E"
           />
 
           <h2
             style={{
               margin: 0,
               color: "#F8FAFC",
-              fontSize: 32,
+              fontSize: 30,
               fontWeight: 800,
               letterSpacing: "-0.6px",
             }}
@@ -56,7 +55,7 @@ export default function BestPractices({
             margin: "18px 0",
             borderRadius: 999,
             background:
-              "linear-gradient(90deg,#38BDF8,#22C55E,transparent)",
+              "linear-gradient(90deg,#22C55E,#38BDF8,transparent)",
           }}
         />
 
@@ -68,7 +67,7 @@ export default function BestPractices({
             lineHeight: 1.65,
           }}
         >
-          AI evaluated engineering standards and coding practices across the repository.
+          Positive software engineering practices identified by the AI during repository analysis.
         </p>
       </div>
 
@@ -80,7 +79,7 @@ export default function BestPractices({
             color: "#94A3B8",
           }}
         >
-          No best practice data available.
+          No notable engineering practices were detected.
         </div>
       ) : (
         <div
@@ -107,13 +106,11 @@ function PracticeCard({
 }: {
   practice: BestPractice;
 }) {
-  const passed = practice.status === "PASSED";
-
   return (
     <motion.div
       whileHover={{
         y: -3,
-        borderColor: "rgba(61,217,235,.18)",
+        borderColor: "rgba(34,197,94,.25)",
       }}
       transition={{
         duration: 0.25,
@@ -121,10 +118,8 @@ function PracticeCard({
       style={{
         background: "#172436",
         borderRadius: 18,
-        border: "1px solid rgba(61,217,235,.08)",
-        borderLeft: `5px solid ${
-          passed ? "#22C55E" : "#EF4444"
-        }`,
+        border: "1px solid rgba(34,197,94,.10)",
+        borderLeft: "5px solid #22C55E",
         padding: "20px",
       }}
     >
@@ -141,7 +136,7 @@ function PracticeCard({
 
       <div
         style={{
-          color: "#94A3B8",
+          color: "#CBD5E1",
           fontSize: 14,
           lineHeight: 1.7,
         }}

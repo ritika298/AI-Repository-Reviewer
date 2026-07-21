@@ -1,5 +1,5 @@
 import {
-  AlertTriangle,
+ ShieldAlert,
   FileCode2,
   Wrench,
 } from "lucide-react";
@@ -36,10 +36,10 @@ export default function BugFindings({
     marginTop: 6,
   }}
 >
-  <AlertTriangle
-    size={20}
-    color="#EF4444"
-  />
+  <ShieldAlert
+              size={26}
+              color="#38BDF8"
+            />
 
   <h2
     style={{
@@ -62,7 +62,7 @@ export default function BugFindings({
           margin: "16px 0 20px",
           borderRadius: 999,
           background:
-            "linear-gradient(90deg,#EF4444,#F59E0B,transparent)",
+            "linear-gradient(90deg,#22C55E,#38BDF8,transparent)",
         }}
       />
 

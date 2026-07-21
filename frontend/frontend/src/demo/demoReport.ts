@@ -148,6 +148,57 @@ const demoReport = {
     },
   ],
 
+security: {
+  secure: false,
+
+  findings: [
+    {
+      type: "Environment File",
+      file: ".env",
+      line: 1,
+      description:
+        "An environment (.env) file is committed to the repository. Sensitive configuration files should not be tracked in version control.",
+      action: "Immediate Action Required",
+    },
+
+    {
+      type: "OpenAI API Key",
+      file: ".env",
+      line: 4,
+      description:
+        "A hardcoded OpenAI API key was detected. API keys should never be committed to the repository.",
+      action: "Immediate Action Required",
+    },
+
+    {
+      type: "GitHub Personal Access Token",
+      file: "config/github.cpp",
+      line: 17,
+      description:
+        "A GitHub Personal Access Token appears to be hardcoded. Store credentials in environment variables or a secure secrets manager.",
+      action: "Immediate Action Required",
+    },
+
+    {
+      type: "JWT Secret",
+      file: "auth/auth.cpp",
+      line: 28,
+      description:
+        "A hardcoded JWT secret was detected. Secrets should be stored outside the source code.",
+      action: "Immediate Action Required",
+    },
+
+    {
+      type: "Database Password",
+      file: "database/db_config.cpp",
+      line: 13,
+      description:
+        "A hardcoded database password was detected. Credentials should never be committed to version control.",
+      action: "Immediate Action Required",
+    },
+  ],
+},
+
   bestPractices: [
     {
       category: "Code Modularity",

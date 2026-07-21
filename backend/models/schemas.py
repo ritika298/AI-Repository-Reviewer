@@ -1,29 +1,26 @@
 from typing import TypedDict, List, Dict, Any
 
 
-class SharedState(TypedDict):
-    job_id: str
-    goal: str
-    repo_name: str
-    language: str
-    framework: str
-    total_files: int
-    retrieved_chunks: List[Dict[str, Any]]
-    metadata: Dict[str, Any]
+# ---------------------------------------------------------
+# Security
+# ---------------------------------------------------------
 
-    repository_understanding: Dict[str, Any]
-    architecture: Dict[str, Any]
+class SecurityFinding(TypedDict):
+    type: str
+    file: str
+    line: int
+    description: str
+    action: str
 
-    bugs: List[Dict[str, Any]]
-    best_practices: List[Dict[str, Any]]
 
-    recommendations: List[str]
-    health_score: int
+class SecurityReport(TypedDict):
+    secure: bool
+    findings: List[SecurityFinding]
 
-    final_report: Dict[str, Any]
 
-    from typing import TypedDict, List, Dict, Any
-
+# ---------------------------------------------------------
+# Shared State
+# ---------------------------------------------------------
 
 class SharedState(TypedDict):
     # -----------------------------
@@ -43,19 +40,18 @@ class SharedState(TypedDict):
     metadata: Dict[str, Any]
 
     # -----------------------------
+    # Security Scan
+    # -----------------------------
+    security: SecurityReport
+
+    # -----------------------------
     # AI Agent Outputs
     # -----------------------------
     repository_understanding: Dict[str, Any]
     architecture: Dict[str, Any]
 
     bugs: List[Dict[str, Any]]
-
     best_practices: List[Dict[str, Any]]
-
-    # Future
-   # security: Dict[str, Any]
-
-    #metrics: Dict[str, Any]
 
     # -----------------------------
     # Final Report

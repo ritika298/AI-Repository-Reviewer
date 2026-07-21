@@ -1,4 +1,4 @@
-import { RotateCcw, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 interface DashboardHeaderProps {
   onAnalyzeAgain: () => void;
@@ -13,36 +13,6 @@ export default function DashboardHeader({
         marginBottom: "56px",
       }}
     >
-      {/* Analyze Again */}
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginBottom: "28px",
-        }}
-      >
-        <button
-          onClick={onAnalyzeAgain}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "12px 22px",
-            borderRadius: "999px",
-            border: "1px solid rgba(61,217,235,.15)",
-            background: "#172436",
-            color: "#E2E8F0",
-            cursor: "pointer",
-            fontWeight: 600,
-            transition: ".2s",
-          }}
-        >
-          <RotateCcw size={18} />
-          Analyze Again
-        </button>
-      </div>
-
       {/* Heading */}
 
       <h1

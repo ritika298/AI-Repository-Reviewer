@@ -3,14 +3,15 @@ from typing import List, Dict, Any
 from models.schemas import SharedState
 from core.progress import update_progress
 
+
 def merge_duplicate_bugs(bugs):
     grouped = {}
 
     for bug in bugs:
         key = (
-        bug.get("severity", "LOW"),
-         bug.get("description", "").strip().lower(),
-        bug.get("fix", "").strip().lower(),
+            bug.get("severity", "LOW"),
+            bug.get("description", "").strip().lower(),
+            bug.get("fix", "").strip().lower(),
         )
 
         if key not in grouped:
@@ -22,10 +23,9 @@ def merge_duplicate_bugs(bugs):
             }
 
         file_entry = {
-        "file": bug.get("file", "Unknown"),
-        "line": bug.get("line", 0),   
+            "file": bug.get("file", "Unknown"),
+            "line": bug.get("line", 0),
         }
-        
 
         if file_entry not in grouped[key]["files"]:
             grouped[key]["files"].append(file_entry)
@@ -54,11 +54,6 @@ def compute_health_score(
         else:
             score -= 2
 
-    # Deduct points for failed best practices
-    for practice in best_practices:
-        if practice["status"] == "FAILED":
-            score -= 2
-
     return max(0, min(100, score))
 
 
@@ -85,8 +80,8 @@ def response_formatter(state: SharedState) -> SharedState:
     merged_bugs = merge_duplicate_bugs(state["bugs"])
 
     health_score = compute_health_score(
-      merged_bugs,
-     state["best_practices"],
+        merged_bugs,
+        state["best_practices"],
     )
 
     state["health_score"] = health_score
@@ -94,9 +89,9 @@ def response_formatter(state: SharedState) -> SharedState:
     recommendations = []
 
     high_bugs = [
-      bug
-      for bug in merged_bugs
-      if bug["severity"] == "HIGH"
+        bug
+        for bug in merged_bugs
+        if bug["severity"] == "HIGH"
     ]
 
     if high_bugs:
@@ -104,32 +99,10 @@ def response_formatter(state: SharedState) -> SharedState:
             f"Address {len(high_bugs)} high-severity issue(s) before deploying to production."
         )
 
-    failed_practices = [
-        p
-        for p in state["best_practices"]
-        if p["status"] == "FAILED"
-    ]
-
-    for p in failed_practices[:3]:
-        recommendations.append(
-            f"Improve {p['category'].lower()}: {p['details']}"
-        )
-
     if not recommendations:
         recommendations.append(
             "Repository is in good health. Continue following current engineering practices."
         )
-
-    testing_failed = any(
-       p["category"] == "Testing"
-       and p["status"] == "FAILED"
-      for p in state["best_practices"]
-     )
-
-    if testing_failed:
-      recommendations.append(
-        "Increase automated test coverage for critical application workflows."
-    )
 
     files_retrieved = []
 
@@ -149,6 +122,7 @@ def response_formatter(state: SharedState) -> SharedState:
         "repositoryUnderstanding": state["repository_understanding"],
         "architecture": state["architecture"],
         "bugs": merged_bugs,
+        "security": state["security"],
         "bestPractices": state["best_practices"],
         "recommendations": recommendations,
         "filesRetrievedByRag": files_retrieved,
@@ -171,16 +145,3 @@ def response_formatter(state: SharedState) -> SharedState:
     )
 
     return state
-
-# Your backend now returns:
-# {
-#   "severity": "HIGH",
-#   "description": "...",
-#   "fix": "...",
-#   "files": [
-#     {
-#       "file": "main.py",
-#       "line": 42
-#     }
-#   ]
-# }'''

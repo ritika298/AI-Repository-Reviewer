@@ -3,15 +3,14 @@ from core.progress import update_progress
 from services.gemini import call_gemini_json
 from utils.formatter import format_chunks_for_prompt
 
-
-CATEGORIES = [
+CATEGORIES = {
     "Code Modularity",
     "Naming Conventions",
     "Error Handling",
     "Documentation",
     "Testing",
     "Security Practices",
-]
+}
 
 
 def best_practice_agent(state: SharedState) -> SharedState:
@@ -30,47 +29,58 @@ You are a Senior Software Quality Engineer.
 
 Evaluate ONLY the provided repository context.
 
-Do NOT search for issues outside the supplied code.
+Do NOT search outside the supplied code.
 
-Do NOT repeat bug detection.
+Do NOT identify bugs.
 
-Do NOT describe architecture.
+Do NOT provide recommendations.
 
-Your task is ONLY to evaluate software engineering best practices.
+Do NOT mention anything missing.
 
-Evaluate EXACTLY these six categories:
+Do NOT use words like:
+missing,
+lacking,
+could be improved,
+should,
+needs,
+fails,
+insufficient,
+limited,
+weak,
+poor.
 
-1. Code Modularity
-2. Naming Conventions
-3. Error Handling
-4. Documentation
-5. Testing
-6. Security Practices
+Your task is ONLY to identify GOOD software engineering practices that are already demonstrated by this repository.
 
-For each category:
+Evaluate these categories when evidence exists:
 
-• PASS if generally followed.
+- Code Modularity
+- Naming Conventions
+- Error Handling
+- Documentation
+- Testing
+- Security Practices
 
-• FAIL if important improvements are needed.
+Rules:
 
- Keep details under 20 words.
-
- Mention only the most important observation.
-
- Avoid generic advice.
+• Return ONLY categories with clear positive evidence.
+• Skip categories without sufficient evidence.
+• Every observation must be positive.
+• Keep details under 20 words.
+• Mention concrete evidence whenever possible.
+• Never invent practices unsupported by the repository.
+• Do not repeat architecture descriptions.
 
 Return ONLY valid JSON.
 
 Schema:
 
 {{
-  "bestPractices":[
-      {{
-          "category":"",
-          "status":"PASSED|FAILED",
-          "details":""
-      }}
-  ]
+    "bestPractices":[
+        {{
+            "category":"",
+            "details":""
+        }}
+    ]
 }}
 
 Repository Context:
@@ -82,33 +92,11 @@ Repository Context:
         "bestPractices": [
             {
                 "category": "Code Modularity",
-                "status": "PASSED",
-                "details": "Code is organized into logical modules.",
+                "details": "Code is organized into logical reusable modules."
             },
             {
                 "category": "Naming Conventions",
-                "status": "PASSED",
-                "details": "Identifiers follow consistent naming conventions.",
-            },
-            {
-                "category": "Error Handling",
-                "status": "FAILED",
-                "details": "Exception handling can be improved.",
-            },
-            {
-                "category": "Documentation",
-                "status": "FAILED",
-                "details": "Some functions lack documentation.",
-            },
-            {
-                "category": "Testing",
-                "status": "FAILED",
-                "details": "Limited evidence of automated tests.",
-            },
-            {
-                "category": "Security Practices",
-                "status": "PASSED",
-                "details": "No obvious insecure coding practices detected in the reviewed context.",
+                "details": "Identifiers follow consistent naming conventions."
             },
         ]
     }
@@ -121,45 +109,30 @@ Repository Context:
     if not isinstance(result, dict):
         result = fallback
 
-    practices = result.get(
-        "bestPractices",
-        []
-    )
+    practices = result.get("bestPractices", [])
 
     normalized = []
-
     seen = set()
 
-    for category in CATEGORIES:
+    for practice in practices:
 
-        match = next(
-            (
-                p
-                for p in practices
-                if p.get("category") == category
-            ),
-            None,
-        )
+        category = str(practice.get("category", "")).strip()
 
-        if match is None:
-            match = {
-                "category": category,
-                "status": "FAILED",
-                "details": "No assessment generated.",
-            }
+        if category not in CATEGORIES:
+            continue
 
-        status = str(
-            match.get("status", "FAILED")
-        ).upper()
+        if category in seen:
+            continue
 
-        if status not in ("PASSED", "FAILED"):
-            status = "FAILED"
+        details = str(practice.get("details", "")).strip()
+
+        if not details:
+            continue
 
         normalized.append(
             {
                 "category": category,
-                "status": status,
-                "details": match.get("details", ""),
+                "details": details,
             }
         )
 

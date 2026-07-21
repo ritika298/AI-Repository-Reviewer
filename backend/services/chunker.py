@@ -131,16 +131,12 @@ def chunk_code(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
            if f["end"] > f["start"]
         ]
 
-# ===============================
-# Semantic Chunking (Functions)
-# ===============================
-        if valid_functions:
         
 
         # ===============================
         # Semantic Chunking (Functions)
         # ===============================
-          if functions:
+        if functions:
             for func in valid_functions:
                 create_chunk(
                     chunks,

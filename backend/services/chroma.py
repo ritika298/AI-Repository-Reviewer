@@ -34,46 +34,38 @@ def index_chunks_in_chroma(job_id: str, chunks: List[Dict[str, Any]]):
     metadatas = []
 
     for c in chunks:
-     metadatas.append(
-        {
-            "file": str(c.get("file", "")),
-            "language": str(c.get("language", "")),
-            "start_line": int(c.get("start_line", 0)),
-            "end_line": int(c.get("end_line", 0)),
-
-            "chunk_type": str(
-                c.get("chunk_type") or "generic"
-            ),
-
-            "function": str(
-                c.get("function") or ""
-            ),
-
-            "class": str(
-                c.get("class") or ""
-            ),
-
-            "imports": ",".join(
-                map(str, c.get("imports", []))
-            ),
-
-            "is_test": bool(
-                c.get("is_test", False)
-            ),
-
-            "is_config": bool(
-                c.get("is_config", False)
-            ),
-
-            "is_entrypoint": bool(
-                c.get("is_entrypoint", False)
-            ),
-
-            "is_api": bool(
-                c.get("is_api", False)
-            ),
-        }
-    )
+        metadatas.append(
+            {
+                "file": str(c.get("file", "")),
+                "language": str(c.get("language", "")),
+                "start_line": int(c.get("start_line", 0)),
+                "end_line": int(c.get("end_line", 0)),
+                "chunk_type": str(
+                    c.get("chunk_type") or "generic"
+                ),
+                "function": str(
+                    c.get("function") or ""
+                ),
+                "class": str(
+                    c.get("class") or ""
+                ),
+                "imports": ",".join(
+                    map(str, c.get("imports", []))
+                ),
+                "is_test": bool(
+                    c.get("is_test", False)
+                ),
+                "is_config": bool(
+                    c.get("is_config", False)
+                ),
+                "is_entrypoint": bool(
+                    c.get("is_entrypoint", False)
+                ),
+                "is_api": bool(
+                    c.get("is_api", False)
+                ),
+            }
+        )
 
     print("Sample Metadata:")
     print(metadatas[0])
@@ -103,13 +95,12 @@ def retrieve_top_chunks(
 
         results = collection.query(
             query_embeddings=[query_embedding],
-          n_results=min(top_k, len(chunks))
+            n_results=min(top_k, len(chunks))
         )
-
-        retrieved = []
 
         docs = results.get("documents", [[]])[0]
         metas = results.get("metadatas", [[]])[0]
+
         retrieved = []
 
         file_counts = {}
@@ -119,9 +110,10 @@ def retrieve_top_chunks(
             file = meta.get("file", "unknown")
 
             if file_counts.get(file, 0) >= MAX_CHUNKS_PER_FILE:
-             continue
+                continue
 
             file_counts[file] = file_counts.get(file, 0) + 1
+
             retrieved.append(
                 {
                     "file": meta.get("file", "unknown"),
@@ -132,16 +124,16 @@ def retrieve_top_chunks(
                     "function": meta.get("function"),
                     "class": meta.get("class"),
 
-                    # New Metadata
+                    # Metadata
                     "imports": (
                         meta.get("imports", "").split(",")
                         if meta.get("imports")
                         else []
                     ),
-                    "is_test": meta.get("is_test") == "True",
-                    "is_config": meta.get("is_config") == "True",
-                    "is_entrypoint": meta.get("is_entrypoint") == "True",
-                    "is_api": meta.get("is_api") == "True",
+                    "is_test": bool(meta.get("is_test", False)),
+                    "is_config": bool(meta.get("is_config", False)),
+                    "is_entrypoint": bool(meta.get("is_entrypoint", False)),
+                    "is_api": bool(meta.get("is_api", False)),
 
                     "content": doc,
                 }

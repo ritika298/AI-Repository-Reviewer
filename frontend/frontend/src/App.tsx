@@ -1,3 +1,4 @@
+
 import Dashboard from "./components/dashboard/Dashboard";
 
 
@@ -31,20 +32,48 @@ interface BugFinding {
     line: number;
   }[];
 }
+interface SecurityFinding {
+  type: string;
+  file: string;
+  line: number;
+  description: string;
+  action: string;
+}
+interface SecurityReport {
+  secure: boolean;
+  findings: SecurityFinding[];
+}
 
-interface BestPractice { category: string; status: "PASSED" | "FAILED"; details: string; }
+interface BestPractice {
+  category: string;
+  details: string;
+}
 interface Architecture { description: string; diagram: string; patterns: string[]; }
 interface Repository { name: string; language: string; framework: string; totalFiles: number; }
+
+
 interface AnalysisReport {
   repository: Repository;
   healthScore: number;
-  repositoryUnderstanding: { subsystems: Subsystem[]; workflow: WorkflowStep[] };
+
+  repositoryUnderstanding: {
+    subsystems: Subsystem[];
+    workflow: WorkflowStep[];
+  };
+
   architecture: Architecture;
+
   bugs: BugFinding[];
+
+ security: SecurityReport;
+
   bestPractices: BestPractice[];
+
   recommendations: string[];
+
   filesRetrievedByRag: string[];
 }
+
 interface PipelineStep { key: string; label: string; status: "waiting" | "running" | "completed"; }
 
 const AGENT_KEYS = ["repository_understanding_agent", "architecture_agent", "bug_agent", "best_practice_agent"];
@@ -194,20 +223,19 @@ return (
       />
     )}
 
-   
     {loading && !currentReport && (
-      <>
-        <AnalysisLoading />
-
-        <AnimatePresence>
-          <AIThinking
-            steps={steps}
-            AGENT_KEYS={AGENT_KEYS}
-            AGENT_LABELS={AGENT_LABELS}
-          />
-        </AnimatePresence>
-      </>
-    )}
+  <>
+    <AnalysisLoading />
+    <AnimatePresence>
+      <AIThinking
+        steps={steps}
+        AGENT_KEYS={AGENT_KEYS}
+        AGENT_LABELS={AGENT_LABELS}
+      />
+    </AnimatePresence>
+  </>
+)}
+  
 
     {!loading && currentReport && (
       <Dashboard

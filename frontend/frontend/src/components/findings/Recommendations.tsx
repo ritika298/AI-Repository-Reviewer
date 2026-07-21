@@ -43,7 +43,7 @@ export default function Recommendations({
             style={{
               margin: 0,
               color: "#F8FAFC",
-              fontSize: 32,
+              fontSize: 30,
               fontWeight: 800,
               letterSpacing: "-0.7px",
             }}

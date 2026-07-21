@@ -64,6 +64,7 @@ CLASS_PATTERNS = [
     r"struct\s+([A-Za-z0-9_]+)",
 ]
 
+
 def find_block_end(lines, start_line):
     """
     Finds the ending line of a brace-delimited block.
@@ -89,11 +90,13 @@ def find_block_end(lines, start_line):
 
     return start_line
 
+
 IMPORT_PATTERNS = [
     r"import\s+.*?['\"]([^'\"]+)['\"]",
     r"require\(['\"]([^'\"]+)['\"]\)",
     r"^import\s+([\w\.]+)",
 ]
+
 BRACE_LANGUAGES = {
     ".java",
     ".js",
@@ -111,6 +114,7 @@ BRACE_LANGUAGES = {
     ".rs",
     ".php",
 }
+
 
 def extract_generic_ast(
     content: str,
@@ -151,20 +155,21 @@ def extract_generic_ast(
 
             match = re.search(pattern, line)
 
-        if match:
-            if file_info["ext"] in BRACE_LANGUAGES:
-                end_line = find_block_end(lines, lineno)
-            else:
-              end_line = lineno
+            if match:
+                if file_info["ext"] in BRACE_LANGUAGES:
+                    end_line = find_block_end(lines, lineno)
+                else:
+                    end_line = lineno
 
-            functions.append(
-                 {
-               "name": match.group(1),
-               "start": lineno,
-               "end": end_line,
-             }
-              )   
-            break
+                classes.append(
+                    {
+                        "name": match.group(1),
+                        "start": lineno,
+                        "end": end_line,
+                    }
+                )
+
+                break
 
     # -----------------------------
     # Imports

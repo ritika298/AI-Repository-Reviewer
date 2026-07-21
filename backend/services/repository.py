@@ -18,36 +18,75 @@ def clone_or_extract_repo(
 
     if github_url:
         if git is None:
-            raise HTTPException(status_code=500, detail="GitPython not installed on server")
+            raise HTTPException(
+                status_code=500,
+                detail="GitPython not installed on server",
+            )
+
         try:
-            git.Repo.clone_from(github_url, repo_path, depth=1)
+            git.Repo.clone_from(
+                github_url,
+                repo_path,
+                depth=1,
+            )
+
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Failed to clone repository: {e}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to clone repository: {e}",
+            )
+
         return repo_path
-  
+
     if zip_bytes:
         zip_path = os.path.join(work_dir, "upload.zip")
+
         with open(zip_path, "wb") as f:
             f.write(zip_bytes)
 
         try:
             with zipfile.ZipFile(zip_path, "r") as zf:
-                for member in zf.namelist():
-                    member_path = os.path.normpath(os.path.join(repo_path, member))
-                    if not member_path.startswith(os.path.abspath(repo_path)):
+                repo_root = os.path.abspath(repo_path)
+
+                for member in zf.infolist():
+                    member_path = os.path.abspath(
+                        os.path.join(
+                            repo_root,
+                            member.filename,
+                        )
+                    )
+
+                    # Prevent ZIP Slip attacks
+                    if not member_path.startswith(repo_root + os.sep):
                         continue
-                zf.extractall(repo_path)
+
+                    zf.extract(member, repo_root)
 
         except zipfile.BadZipFile:
-            raise HTTPException(status_code=400, detail="Invalid ZIP file")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid ZIP file",
+            )
 
         entries = [
-            e for e in os.listdir(repo_path)
+            e
+            for e in os.listdir(repo_path)
             if not e.startswith("__MACOSX")
         ]
 
-        if len(entries) == 1 and os.path.isdir(os.path.join(repo_path, entries[0])):
-            return os.path.join(repo_path, entries[0])
+        if (
+            len(entries) == 1
+            and os.path.isdir(
+                os.path.join(
+                    repo_path,
+                    entries[0],
+                )
+            )
+        ):
+            return os.path.join(
+                repo_path,
+                entries[0],
+            )
 
         return repo_path
 
