@@ -1,5 +1,4 @@
 import {
-  ShieldAlert,
   ShieldCheck,
   AlertTriangle,
   FileCode2,

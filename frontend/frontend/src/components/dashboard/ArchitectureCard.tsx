@@ -1,7 +1,7 @@
 import { FolderTree, Boxes } from "lucide-react";
 
 import GlassCard from "../common/GlassCard";
-import CardTitle from "../common/CardTitle";
+
 
 interface Architecture {
   description: string;

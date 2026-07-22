@@ -1,12 +1,7 @@
 import { CheckCircle2 } from "lucide-react";
 
-interface DashboardHeaderProps {
-  onAnalyzeAgain: () => void;
-}
 
-export default function DashboardHeader({
-  onAnalyzeAgain,
-}: DashboardHeaderProps) {
+export default function DashboardHeader()  {
   return (
     <div
       style={{

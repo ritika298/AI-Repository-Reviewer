@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 
 import GlassCard from "../common/GlassCard";
-import CardTitle from "../common/CardTitle";
+
 
 interface Bug {
   severity: "HIGH" | "MEDIUM" | "LOW";

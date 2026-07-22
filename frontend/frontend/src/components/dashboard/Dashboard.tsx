@@ -22,8 +22,6 @@ interface DashboardProps {
 
 export default function Dashboard({
   report,
-  goal,
-  elapsedMs,
   onAnalyzeAgain,
 }: DashboardProps) {
   return (
@@ -36,7 +34,7 @@ export default function Dashboard({
     >
       {/* Header */}
 
-      <DashboardHeader onAnalyzeAgain={onAnalyzeAgain} />
+      <DashboardHeader />
 
       {/* Top Section */}
 

@@ -11,12 +11,7 @@ import AIThinking from "./components/sidebar/AIThinking";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
-import {
-  
-   Loader2,
-    Bot,
-   XCircle
-} from "lucide-react";
+import { XCircle } from "lucide-react";
 
 const API_BASE = "http://localhost:8000";
 

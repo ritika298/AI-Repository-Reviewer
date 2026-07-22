@@ -4,8 +4,6 @@ import {
   Sparkles,
   Upload,
   Loader2,
-  ChevronRight,
-  Bot,
 } from "lucide-react";
 
 interface LandingPageProps {
