@@ -17,6 +17,38 @@ ENV_FILES = {
 }
 
 # ---------------------------------------------------------
+# Documentation files (skip these)
+# ---------------------------------------------------------
+DOC_EXTENSIONS = {
+    ".md",
+    ".txt",
+    ".rst",
+    ".adoc",
+}
+
+# ---------------------------------------------------------
+# Safe secret-loading functions (do not flag these)
+# ---------------------------------------------------------
+SAFE_LOADERS = (
+    "getenv(",
+    "System.getenv(",
+    "os.getenv(",
+    "process.env",
+    "System.getProperty(",
+    "config.get(",
+)
+
+# ---------------------------------------------------------
+# Password UI APIs that are NOT security issues
+# ---------------------------------------------------------
+SAFE_PASSWORD_APIS = (
+    "getPassword(",
+    "passwordField",
+    "JPasswordField",
+    "PasswordField",
+)
+
+# ---------------------------------------------------------
 # Security Detection Patterns
 # ---------------------------------------------------------
 PATTERNS = [
@@ -53,16 +85,18 @@ PATTERNS = [
         "regex": r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----",
     },
     {
-        "type": "JWT Secret",
-        "regex": r"(?i)(JWT_SECRET|JWT_KEY)\s*[:=]\s*[\"']?.+[\"']?",
+    "type": "JWT Secret",
+    "regex": r'(?i)\b(JWT_SECRET|JWT_KEY)\b\s*[:=]\s*["\'](?!JWT_SECRET|your_|example|changeme|replace_me)[^"\']{8,}["\']',
     },
     {
-        "type": "Secret Key",
-        "regex": r"(?i)(SECRET_KEY|API_KEY|CLIENT_SECRET|ACCESS_TOKEN|REFRESH_TOKEN)\s*[:=]\s*[\"']?.+[\"']?",
+        
+    "type": "Secret Key",
+    "regex": r'(?i)\b(SECRET_KEY|API_KEY|CLIENT_SECRET|ACCESS_TOKEN|REFRESH_TOKEN)\b\s*[:=]\s*["\'](?!SECRET_KEY|API_KEY|CLIENT_SECRET|ACCESS_TOKEN|REFRESH_TOKEN|your_|example|changeme|replace_me)[^"\']{8,}["\']',
+
     },
     {
-        "type": "Database Password",
-        "regex": r"(?i)(DB_PASSWORD|DATABASE_PASSWORD|PASSWORD)\s*[:=]\s*[\"']?.+[\"']?",
+    "type": "Database Password",
+    "regex": r'(?i)\b(DB_PASSWORD|DATABASE_PASSWORD)\b\s*[:=]\s*["\'](?!DB_PASSWORD|your_|example|password|changeme|replace_me)[^"\']{6,}["\']',
     },
 ]
 
@@ -77,7 +111,7 @@ SECURITY_MESSAGES = {
         "A hardcoded Google API key was detected. Store API keys securely using environment variables.",
 
     "GitHub Personal Access Token":
-        "A GitHub Personal Access Token appears to be hardcoded. Store credentials in environment variables or a secure secrets manager.",
+        "A GitHub Personal Access Token appears to be hardcoded. Store credentials securely.",
 
     "AWS Access Key":
         "An AWS Access Key was detected. AWS credentials should never be committed to source control.",
@@ -107,8 +141,37 @@ SECURITY_MESSAGES = {
         "An environment (.env) file is committed to the repository. Sensitive configuration files should not be tracked in version control.",
 }
 
+# ---------------------------------------------------------
+# Validate whether a value looks like a real secret
+# ---------------------------------------------------------
+def looks_like_secret(value: str) -> bool:
+    value = value.strip()
+
+    # Ignore very short values
+    if len(value) < 12:
+        return False
+
+    # Ignore common placeholder/example values
+    placeholders = {
+        "password",
+        "admin",
+        "root",
+        "localhost",
+        "example",
+        "your_secret_key",
+        "changeme",
+        "replace_me",
+        "api_key",
+        "secret_key",
+    }
+
+    if value.lower() in placeholders:
+        return False
+
+    return True
 
 def scan_security(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
     findings = []
 
     for file in files_info:
@@ -116,6 +179,14 @@ def scan_security(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         path = file["path"]
         full_path = file["full_path"]
         filename = os.path.basename(path)
+
+        # ---------------------------------------------------------
+        # Skip documentation files
+        # ---------------------------------------------------------
+        extension = os.path.splitext(path)[1].lower()
+
+        if extension in DOC_EXTENSIONS:
+            continue
 
         # ---------------------------------------------------------
         # Detect committed .env files
@@ -126,6 +197,7 @@ def scan_security(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     "type": "Environment File",
                     "file": path,
                     "line": 1,
+                    "matched": filename,
                     "description": SECURITY_MESSAGES["Environment File"],
                     "action": "Immediate Action Required",
                 }
@@ -144,23 +216,67 @@ def scan_security(files_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             continue
 
         # ---------------------------------------------------------
-        # Scan every line for secrets
+        # Scan every line
         # ---------------------------------------------------------
         for line_number, line in enumerate(lines, start=1):
 
+            stripped = line.strip()
+
+            # Ignore comments
+            if (
+                stripped.startswith("#")
+                or stripped.startswith("//")
+                or stripped.startswith("*")
+                or stripped.startswith("/*")
+            ):
+                continue
+
             for pattern in PATTERNS:
 
-                if re.search(pattern["regex"], line):
+                match = re.search(pattern["regex"], line)
 
-                    findings.append(
-                        {
-                            "type": pattern["type"],
-                            "file": path,
-                            "line": line_number,
-                            "description": SECURITY_MESSAGES[pattern["type"]],
-                            "action": "Immediate Action Required",
-                        }
-                    )
+                if not match:
+                    continue
+                # -------------------------------------------------
+                # Validate generic hardcoded credentials
+                # -------------------------------------------------
+                if pattern["type"] in {
+                   "Secret Key",
+                   "JWT Secret",
+                   "Database Password",
+                  }:
+                  value_match = re.search(r'[:=]\s*["\']([^"\']+)["\']', line)
+
+                  if not value_match:
+                   continue
+
+                  secret_value = value_match.group(1)
+
+                  if not looks_like_secret(secret_value):
+                    continue
+
+                # -------------------------------------------------
+                # Ignore secure environment/config loading
+                # -------------------------------------------------
+                if any(loader in line for loader in SAFE_LOADERS):
+                    continue
+
+                # -------------------------------------------------
+                # Ignore password UI components
+                # -------------------------------------------------
+                if any(api in line for api in SAFE_PASSWORD_APIS):
+                    continue
+
+                findings.append(
+                    {
+                        "type": pattern["type"],
+                        "file": path,
+                        "line": line_number,
+                        "matched": stripped,
+                        "description": SECURITY_MESSAGES[pattern["type"]],
+                        "action": "Immediate Action Required",
+                    }
+                )
 
     # ---------------------------------------------------------
     # Remove duplicate findings
